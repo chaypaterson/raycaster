@@ -28,9 +28,24 @@ int main() {
 
     putheader(img, cols, rows);
 
-    for (int row = 0; row < rows; ++row)
-        for (int col = 0; col < cols; ++col)
-            putpixel(img, BLACK);
+    // Draw the image:
+    for (int row = 0; row < rows; ++row) {
+        for (int col = 0; col < cols; ++col) {
+            Pixel colour = {0, 0, 0};
+
+            // Choose a colour:
+            double f = col * 1.0/cols;
+            int red = (1 - f) * COLOUR_MAX;
+            int blue = f * COLOUR_MAX;
+            int green = f * COLOUR_MAX;
+
+            colour[0] = red;
+            colour[1] = blue;
+            colour[2] = green;
+
+            putpixel(img, colour);
+        }
+    }
 
     fclose(img);
     return 0;
