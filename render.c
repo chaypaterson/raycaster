@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 // This program prints a binary PPM image to a file.
 
-static int COLOUR_MAX = 255;
+#define COLOUR_MAX UCHAR_MAX
 
 void putheader(FILE *img, int cols, int rows) {
     fprintf(img, "P6\n");
@@ -27,12 +28,32 @@ void mixcolours(Pixel newcolour, double weight1, Pixel colour2) {
     }
 }
 
+double luma_y(Pixel colour) {
+    // return the sRGB luminance of a pixel
+    //return 0.2126 * colour[0] + 0.7152 * colour[1] + 0.0722 * colour[2];
+    return 1.0f * colour[0] + 1.0f * colour[1] + 1.0f * colour[2];
+    //return colour[0] * colour[0] + colour[1] * colour[1] + colour[2] * colour[2];
+}
+
+void mixcolours_y_corr(Pixel newcolour, double weight1, Pixel colour2) {
+    // mix the colours, but correct so that the luminance is constant before and
+    // after:
+    double y_before = luma_y(newcolour);
+    mixcolours(newcolour, weight1, colour2);
+    double y_after = luma_y(newcolour);
+
+    for (char ch = 0; ch < 3; ++ch) {
+        newcolour[ch] += (char)((y_before/y_after - 1.0) * newcolour[ch]);
+    }
+}
+
 int main() {
     const char* imagefile = "testimg.ppm";
     Pixel BLACK = {0, 0, 0};
-    Pixel MAGENTA = {255, 0x00, 255};
-    Pixel CYAN = {0x00, 255, 255};
-    Pixel RED = {255, 0x00, 0x00};
+    // NB: COLOUR_MAX, 255, and 0xFF are synonymous on most systems.
+    Pixel MAGENTA = {COLOUR_MAX, 0x00, COLOUR_MAX};
+    Pixel CYAN = {0x00, COLOUR_MAX, COLOUR_MAX};
+    Pixel RED = {COLOUR_MAX, 0x00, 0x00};
 
     int cols = 640;
     int rows = 320;
@@ -49,7 +70,7 @@ int main() {
 
             // Choose a colour:
             double f = col * 1.0/cols;
-            mixcolours(colour, f, CYAN);
+            mixcolours_y_corr(colour, f, CYAN);
 
             putpixel(img, colour);
         }
