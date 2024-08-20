@@ -6,6 +6,7 @@ animations using volumetric raycasting to visualise scientific data.
 
 It compiles with
 
-    cc render.c -o renderer
+    cc pixel.c -c -o pixel.a
+    cc pixel.a render.c -o renderer
 
 Running `./renderer` then produces a PPM image in binary format.
