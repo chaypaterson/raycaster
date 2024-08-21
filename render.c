@@ -9,7 +9,11 @@
 int main() {
     // Test routines from raycast:
     struct VoxelCube cube = new_unit_cube(16, 16, 16);
+    struct ImagePlane plane = new_image_plane(cube, 1, 0, 0, 16, 16);
+    // TODO: struct arguments for plane constructor? one for coords one for
+    // resolution?
     free_unit_cube(cube);
+    free_image_plane(plane);
 
     // Write out a test image:
     const char* imagefile = "testimg.ppm";
