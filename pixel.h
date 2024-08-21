@@ -27,4 +27,4 @@ double luma_y(Pixel colour);
 // Blend two colours, correcting for constant luminance:
 void mixcolours_y_corr(Pixel newcolour, double weight1, Pixel colour2);
 
-#endif
+#endif //PIXEL_H

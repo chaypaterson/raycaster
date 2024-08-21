@@ -4,8 +4,14 @@
 // This program prints a binary PPM image to a file.
 
 #include "pixel.h"
+#include "raycast.h"
 
 int main() {
+    // Test routines from raycast:
+    struct VoxelCube cube = new_unit_cube(16, 16, 16);
+    free_unit_cube(cube);
+
+    // Write out a test image:
     const char* imagefile = "testimg.ppm";
     Pixel BLACK = {0, 0, 0};
     // NB: COLOUR_MAX, 255, and 0xFF are synonymous on most systems.
@@ -15,6 +21,8 @@ int main() {
 
     int cols = 640;
     int rows = 320;
+
+    // Open a file and write an image to it:
 
     FILE* img = fopen(imagefile, "w");
 
