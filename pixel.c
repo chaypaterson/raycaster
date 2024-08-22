@@ -44,3 +44,8 @@ void mixcolours_y_corr(Pixel newcolour, double weight1, Pixel colour2) {
         newcolour[ch] += (char)((y_before/y_after - 1.0) * newcolour[ch]);
     }
 }
+
+char quantise(float colourch) {
+    // quantise a floating point colour channel value
+    return (char)(colourch);
+}

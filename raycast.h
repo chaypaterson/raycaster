@@ -64,7 +64,7 @@ struct ImagePlane {
 
 struct VoxelCube {
     struct {
-        unsigned x, y, z;
+        unsigned x, y, z; // TODO better names? not important?
     } resol;
 
     struct {
@@ -81,22 +81,39 @@ struct VoxelCube {
     //          this.buff[row][col][layer]
 };
 
-// Construct and return a new unit cube:
-struct VoxelCube new_unit_cube(unsigned x, unsigned y, unsigned z);
+// Construct and return a new unit cube with the specified resolution:
+struct VoxelCube new_unit_cube(unsigned res_x, unsigned res_y, unsigned res_z);
 
 // Free the memory in the image buffer of the unit cube:
 void free_unit_cube(struct VoxelCube unitcube);
 
-// Construct and return a new image plane:
+// Construct and return a new image plane with the specified resolution:
+struct ImagePlane new_image_plane(unsigned rows, unsigned cols);
+
+// Free the memory in the image buffer of the image plane:
+void free_image_plane(struct ImagePlane plane);
+
+// Reorient the image plane to view the reference cube from a given location in
+// polar coordinates:
 // We need to pass a reference cube, a distance from its centre, and two angles
 // in polar coordinates. The function will return an image plane that is tangent
 // to the bounding "sphere": i.e. oriented so that the vector connecting the
 // cube's centre with the plane's centre is normal to the plane.
-struct ImagePlane new_image_plane(struct VoxelCube ref_cube,
-                                  double range, double theta, double phi,
-                                  unsigned rows, unsigned cols);
+void orient_image_plane(struct ImagePlane* image_plane,
+                        struct VoxelCube ref_cube,
+                        double range, double theta, double phi);
 
-// Free the memory in the image buffer of the image plane:
-void free_image_plane(struct ImagePlane plane);
+// test if a point is inside a box:
+char is_inside_box(Vector point, struct VoxelCube box);
+
+// shoot a ray along a vector and accumulate the colours of voxels inside a
+// result:
+
+void shoot_ray(Colour restrict result, Vector start, Vector dir,
+               struct VoxelCube cube, double tmax);
+
+// cast rays from an image plane onto a voxel cube:
+
+void raycast(struct ImagePlane image_plane, struct VoxelCube cube);
 
 #endif //RAYCAST_H

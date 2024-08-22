@@ -6,15 +6,7 @@
 #include "pixel.h"
 #include "raycast.h"
 
-int main() {
-    // Test routines from raycast:
-    struct VoxelCube cube = new_unit_cube(16, 16, 16);
-    struct ImagePlane plane = new_image_plane(cube, 1, 0, 0, 16, 16);
-    // TODO: struct arguments for plane constructor? one for coords one for
-    // resolution?
-    free_unit_cube(cube);
-    free_image_plane(plane);
-
+void gradient_test() {
     // Write out a test image:
     const char* imagefile = "testimg.ppm";
     Pixel BLACK = {0, 0, 0};
@@ -47,5 +39,52 @@ int main() {
     }
 
     fclose(img);
+}
+
+int main() {
+    // Test routines from raycast:
+    struct VoxelCube cube = new_unit_cube(32, 32, 32);
+    struct ImagePlane plane = new_image_plane(64, 64);
+
+    // Set scene geometry:
+    orient_image_plane(&plane, cube, 2.0, 1.0f, 1.0f);
+
+    // Fill cube with stuff:
+    for (unsigned row = 0; row < cube.resol.x; ++row) {
+        for (unsigned col = 0; col < cube.resol.y; ++col) {
+            for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+                for (char ch = 0; ch < 3; ++ch) {
+                    // TODO: number of channels is usually 3 but this should
+                    // really be a variable defined in a header file. what if we
+                    // wanted an alpha channel?
+                    cube.buff[row][col][lyr][ch] = 1.0f;
+                }
+            }
+        }
+    }
+
+    // render:
+    raycast(plane, cube);
+
+    // quantise colours and write out plane image buffer:
+    FILE* img = fopen("rendering1.ppm", "w");
+
+    putheader(img, plane.resol.cols, plane.resol.rows);
+
+    for (unsigned row = 0; row < plane.resol.rows; ++row) {
+        for (unsigned col = 0; col < plane.resol.cols; ++col) {
+            Pixel colour;
+            for (char ch = 0; ch < 3; ++ch) {
+                colour[ch] = quantise(plane.buff[row][col][ch]);
+            }
+            putpixel(img, colour);
+        }
+    }
+
+    fclose(img);
+
+    free_unit_cube(cube);
+    free_image_plane(plane);
+
     return 0;
 }

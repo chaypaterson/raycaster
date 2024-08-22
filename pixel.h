@@ -27,4 +27,7 @@ double luma_y(Pixel colour);
 // Blend two colours, correcting for constant luminance:
 void mixcolours_y_corr(Pixel newcolour, double weight1, Pixel colour2);
 
+// quantise a floating point value to a char:
+char quantise(float colourch);
+
 #endif //PIXEL_H
