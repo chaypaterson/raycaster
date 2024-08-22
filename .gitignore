@@ -4,3 +4,4 @@ example-images
 *.ppm
 *.png
 *.a
+*.dSYM

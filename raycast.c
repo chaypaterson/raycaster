@@ -148,10 +148,9 @@ char is_inside_box(Vector point, struct VoxelCube box) {
                    // future engineers.
 
     for (char axis = 0; axis < 3; ++axis) {
-        test &= (point[axis] >
-                 (box.geom.centre[axis] - box.geom.dims[axis] * 0.5));
-        test &= (point[axis] <
-                 (box.geom.centre[axis] + box.geom.dims[axis] * 0.5));
+        double diff = point[axis] - box.geom.centre[axis];
+        test = test && (diff > -box.geom.dims[axis] * 0.5);
+        test = test && (diff < +box.geom.dims[axis] * 0.5);
     }
 
     return test;
@@ -181,7 +180,6 @@ void shoot_ray(Colour restrict result,
             ray[axis] = start[axis]; // TODO how expensive is this?
             ray[axis] += t * dir[axis];
         }
-        printf("t = %g ", t);
 
         if (is_inside_box(ray, cube)) {
             // get the coords of the nearest voxel:
@@ -204,8 +202,8 @@ void shoot_ray(Colour restrict result,
                 result[ch] += cube.buff[row][col][lyr][ch];
                 printf("%g ", result[ch]);
             }
+            printf("\n");
         }
-        printf("\n");
 
         // TODO: if we have just left the cube, break immediately and don't wait
         // to hit tmax. This uses convexity of the bounding box to safely leave
@@ -279,12 +277,16 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
                 delta = image_plane.geom.tangent[1][axis];
                 delta *= image_plane.geom.dims[1];
                 delta *= col * 1.0 / image_plane.resol.cols;
+                ray[axis] += delta;
             }
 
             // ray is now at the pixel coordinates in the scene. Cast this ray
             // in the direction "normal" (to the plane -- towards the cube)
 
+            printf("hello\n");
+
             Colour pixel = image_plane.buff[row][col];
+            printf("boo\n");
 
             shoot_ray(pixel, ray, normal, cube, tmax);
         }

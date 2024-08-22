@@ -63,7 +63,10 @@ int main() {
         }
     }
 
-    // render:
+    // unit test: check if the centre of the cube is inside the cube:
+    printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
+
+    // render scene:
     raycast(plane, cube);
 
     // quantise colours and write out plane image buffer:
