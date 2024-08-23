@@ -126,7 +126,7 @@ void orient_image_plane(struct ImagePlane *image_plane,
         image_plane->geom.centre[axis] += deltar[axis];
     }
 
-    // Place eye at 2 * range:
+    // Place eye at 4 * range:
     for (char axis = 0; axis < 3; ++axis) {
         image_plane->geom.eye[axis] = ref_cube.geom.centre[axis];
         image_plane->geom.eye[axis] += 4 * deltar[axis];
@@ -175,7 +175,7 @@ void shoot_ray(Colour restrict result,
     // choose a step: plausible step is cube dimensions / resolution
     double dt = cube.geom.dims[0] * 1.0 / cube.resol.x;
 
-    double extinction = 0.98; // TESTING
+    double extinction = 1.00; // TESTING
     double weight = 1.0;
 
     // compute this once and use it later:
@@ -188,7 +188,7 @@ void shoot_ray(Colour restrict result,
 
     for (double t = 0; t < tmax; t += dt) {
         for (char axis = 0; axis < 3; ++axis) {
-            ray[axis] = start[axis]; // TODO how expensive is this?
+            ray[axis] = start[axis];
             ray[axis] += t * dir[axis];
         }
 
@@ -230,6 +230,7 @@ void shoot_ray(Colour restrict result,
     }
 }
 
+#include <stdio.h> // DEBUG
 void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     // Fill the image_plane's image buffer by casting rays onto the cube from
     // each pixel
@@ -274,6 +275,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
             // get scene coordinates of this pixel in the image plane
             Vector ray;
+            
             // start at the plane corner and slide along the tangent vectors:
             for (char axis = 0; axis < 3; ++axis) {
                 ray[axis] = corner[axis];
@@ -282,6 +284,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
                 delta *= image_plane.geom.dims[0];
                 delta *= row * 1.0 / image_plane.resol.rows;
                 ray[axis] += delta;
+
                 // then the y/col/phi direction:
                 delta = image_plane.geom.tangent[1][axis];
                 delta *= image_plane.geom.dims[1];
@@ -304,7 +307,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
             Colour pixel = image_plane.buff[row][col];
 
-            shoot_ray(pixel, ray, dirn, cube, tmax);
+            shoot_ray(pixel, ray, normal, cube, tmax);
         }
     }
 }
