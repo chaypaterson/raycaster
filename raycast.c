@@ -86,6 +86,7 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
         .geom.dims = {3, 3},
         .geom.centre = {0, 0, 0},
         .geom.tangent = {{0, 0, 0}, {0, 0, 0}},
+        .geom.eye = {3, 0, 0},
 
         .buff = buff
     };
@@ -119,9 +120,16 @@ void orient_image_plane(struct ImagePlane *image_plane,
                      range * sin(theta) * sin(phi),
                      range * cos(theta)};
 
+    // Move image plane to new location:
     for (char axis = 0; axis < 3; ++axis) {
         image_plane->geom.centre[axis] = ref_cube.geom.centre[axis];
         image_plane->geom.centre[axis] += deltar[axis];
+    }
+
+    // Place eye at 2 * range:
+    for (char axis = 0; axis < 3; ++axis) {
+        image_plane->geom.eye[axis] = ref_cube.geom.centre[axis];
+        image_plane->geom.eye[axis] += 4 * deltar[axis];
     }
 
     // compute tangent vectors:
@@ -138,6 +146,7 @@ void orient_image_plane(struct ImagePlane *image_plane,
     image_plane->geom.tangent[1][0] = -sin(phi);
     image_plane->geom.tangent[1][1] = +cos(phi);
     image_plane->geom.tangent[1][2] = 0;
+
 }
 
 char is_inside_box(Vector point, struct VoxelCube box) {
@@ -210,7 +219,7 @@ void shoot_ray(Colour restrict result,
             // get the colour of this voxel and update result:
 
             for (char ch = 0; ch < 3; ++ch) {
-                result[ch] += cube.buff[row][col][lyr][ch];
+                result[ch] += cube.buff[row][col][lyr][ch] * dt;
             }
         }
 
@@ -288,12 +297,21 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
             }
 
             // ray is now at the pixel coordinates in the scene. Cast this ray
-            // in the direction "normal" (to the plane -- towards the cube)
+            // in the direction from the eye to the pixel.
+            // Previous version: direction "normal" (to the plane -- towards the cube)
 
+            Vector dirn;
+            double norm = 0;
+            for (char axis = 0; axis < 3; ++axis) {
+                dirn[axis] = ray[axis] - image_plane.geom.eye[axis];
+                norm += dirn[axis] * dirn[axis];
+            }
+            norm = sqrt(norm);
+            for (char axis = 0; axis < 3; ++axis) dirn[axis] /= norm;
 
             Colour pixel = image_plane.buff[row][col];
 
-            shoot_ray(pixel, ray, normal, cube, tmax);
+            shoot_ray(pixel, ray, dirn, cube, tmax);
         }
     }
 }

@@ -99,7 +99,7 @@ int main() {
             for (unsigned col = 0; col < plane.resol.cols; ++col) {
                 Pixel colour;
                 for (char ch = 0; ch < 3; ++ch) {
-                    colour[ch] = quantise(plane.buff[row][col][ch], 64.0, 0.75);
+                    colour[ch] = quantise(plane.buff[row][col][ch], 1.0, 0.75);
                     // wipe the image plane buffer:
                     plane.buff[row][col][ch] = 0.0f;
                 }
