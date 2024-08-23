@@ -173,7 +173,10 @@ void shoot_ray(Colour restrict result,
     // by any other name in this function
 
     // choose a step: plausible step is cube dimensions / resolution
-    double dt = cube.geom.dims[1] * 1.0 / cube.resol.x;
+    double dt = cube.geom.dims[0] * 1.0 / cube.resol.x;
+
+    double extinction = 0.98; // TESTING
+    double weight = 1.0;
 
     // compute this once and use it later:
     Vector corner; // of the cube
@@ -219,21 +222,11 @@ void shoot_ray(Colour restrict result,
             // get the colour of this voxel and update result:
 
             for (char ch = 0; ch < 3; ++ch) {
-                result[ch] += cube.buff[row][col][lyr][ch] * dt;
+                result[ch] += cube.buff[row][col][lyr][ch] * dt * weight;
             }
-        }
 
-        // TODO: if we have just left the cube, break immediately and don't wait
-        // to hit tmax. This uses convexity of the bounding box to safely leave
-        // early.
-        // Do something like this: 
-        // flag bool was_inside = false; 
-        // for ... for ... // main loop
-        //     if (is_inside_box(ray, cube)) {
-        //          ... do stuff ... 
-        //           was_inside = true;
-        //     }
-        //     if (was_inside && !is_inside_box(ray, cube)) return; 
+            weight *= extinction;
+        }
     }
 }
 

@@ -74,7 +74,7 @@ int main() {
     printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
 
     // Set scene geometry:
-    double theta = 1.0f;
+    double theta = M_PI * 0.5;
     double phi = 1.0f;
 
     // Create video with multiple views of the same cube:
@@ -109,7 +109,8 @@ int main() {
 
         fclose(img);
 
-        phi += 2.0 * M_PI / maxframes;
+        //phi += 2.0 * M_PI / maxframes;
+        theta -= M_PI * 1.0 / maxframes;
     }
 
     free_unit_cube(cube);
