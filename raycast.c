@@ -170,7 +170,7 @@ void shoot_ray(Colour restrict result,
     // compute this once and use it later:
     Vector corner; // of the cube
     for (char axis = 0; axis < 3; ++axis) {
-        corner[axis] = cube.geom.centre[axis] - cube.geom.dims[axis];
+        corner[axis] = cube.geom.centre[axis] - 0.5 * cube.geom.dims[axis];
     }
 
     Vector ray; // shoot this ray
@@ -196,11 +196,24 @@ void shoot_ray(Colour restrict result,
             unsigned col = (0.5 + cube.resol.y * difference[1]);
             unsigned lyr = (0.5 + cube.resol.z * difference[2]);
 
+            // Note: I prefer multiplying by tests here to avoid branching
+
+            // bounds checking: ensure that none of these exceed the resolution
+            row += (cube.resol.x - 1 - row) * (row >= cube.resol.x);
+            col += (cube.resol.y - 1 - col) * (col >= cube.resol.y);
+            lyr += (cube.resol.z - 1 - lyr) * (lyr >= cube.resol.z);
+
+            // and are all positive
+            row += -row * (row < 0);
+            col += -col * (col < 0);
+            lyr += -lyr * (lyr < 0);
+
             // get the colour of this voxel and update result:
 
             for (char ch = 0; ch < 3; ++ch) {
+                printf("%d %d %d / %d %d %d\n", row, col, lyr, cube.resol.x,
+                cube.resol.y, cube.resol.z);
                 result[ch] += cube.buff[row][col][lyr][ch];
-                printf("%g ", result[ch]);
             }
             printf("\n");
         }
