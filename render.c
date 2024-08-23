@@ -42,22 +42,23 @@ void gradient_test() {
 }
 
 int main() {
-    // Test routines from raycast:
+    // Construct voxel cube:
     struct VoxelCube cube = new_unit_cube(32, 32, 32);
-    struct ImagePlane plane = new_image_plane(640, 640);
-
-    // Set scene geometry:
-    orient_image_plane(&plane, cube, 2.0, 1.0f, 1.0f);
 
     // Fill cube with stuff:
     for (unsigned row = 0; row < cube.resol.x; ++row) {
         for (unsigned col = 0; col < cube.resol.y; ++col) {
             for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+                // Make an RGB cube:
+                float voxel[3] = {row * 1.0f / cube.resol.x,
+                                  col * 1.0f / cube.resol.y,
+                                  lyr * 1.0f / cube.resol.z};
+
                 for (char ch = 0; ch < 3; ++ch) {
                     // TODO: number of channels is usually 3 but this should
                     // really be a variable defined in a header file. what if we
                     // wanted an alpha channel?
-                    cube.buff[row][col][lyr][ch] = 1.0f;
+                    cube.buff[row][col][lyr][ch] = voxel[ch];
                 }
             }
         }
@@ -66,25 +67,50 @@ int main() {
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
 
-    // render scene:
-    raycast(plane, cube);
+    // construct imaging plane:
+    struct ImagePlane plane = new_image_plane(640, 640);
+    plane.geom.dims[0] = 4;
+    plane.geom.dims[1] = 4;
+    printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
 
-    // quantise colours and write out plane image buffer:
-    FILE* img = fopen("rendering1.ppm", "w");
+    // Set scene geometry:
+    double theta = 1.0f;
+    double phi = 1.0f;
 
-    putheader(img, plane.resol.cols, plane.resol.rows);
+    // Create video with multiple views of the same cube:
+    int maxframes = 150;
 
-    for (unsigned row = 0; row < plane.resol.rows; ++row) {
-        for (unsigned col = 0; col < plane.resol.cols; ++col) {
-            Pixel colour;
-            for (char ch = 0; ch < 3; ++ch) {
-                colour[ch] = quantise(plane.buff[row][col][ch]);
+    for (int frame = 0; frame < maxframes; ++frame) {
+        orient_image_plane(&plane, cube, 2.0, theta, phi);
+
+        // render scene:
+        raycast(plane, cube);
+
+        // quantise colours and write out plane image buffer:
+        char frameppm[sizeof("frame000.ppm")];
+        sprintf(frameppm, "frame%03d.ppm", frame);
+        //FILE* img = fopen("rendering1.ppm", "w");
+        FILE* img = fopen(frameppm, "w");
+
+        putheader(img, plane.resol.cols, plane.resol.rows);
+
+        // TODO are rows and cols mislabeled?
+        for (unsigned row = 0; row < plane.resol.rows; ++row) {
+            for (unsigned col = 0; col < plane.resol.cols; ++col) {
+                Pixel colour;
+                for (char ch = 0; ch < 3; ++ch) {
+                    colour[ch] = quantise(plane.buff[row][col][ch], 64.0, 0.75);
+                    // wipe the image plane buffer:
+                    plane.buff[row][col][ch] = 0.0f;
+                }
+                putpixel(img, colour);
             }
-            putpixel(img, colour);
         }
-    }
 
-    fclose(img);
+        fclose(img);
+
+        phi += 2.0 * M_PI / maxframes;
+    }
 
     free_unit_cube(cube);
     free_image_plane(plane);

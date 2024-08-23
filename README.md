@@ -11,3 +11,6 @@ It compiles with
     cc pixel.a raycast.a render.c -o renderer
 
 Running `./renderer` then produces a PPM image in binary format.
+
+Note: compiling raycast.c with optimisation levels higher than -O1 results in
+errors and is not recommended.

@@ -1,4 +1,5 @@
 #include "pixel.h"
+#include <math.h>
 
 /* Library containing helper functions for PPM files and pixel operations.
  */
@@ -45,7 +46,13 @@ void mixcolours_y_corr(Pixel newcolour, double weight1, Pixel colour2) {
     }
 }
 
-char quantise(float colourch) {
+char quantise(float colourch, float sat, float gamma) {
     // quantise a floating point colour channel value
-    return (char)(colourch);
+    float value;
+    // Apply saturation:
+    value = 1 - expf(-colourch / sat);
+    // Apply colour correction:
+    value = expf(gamma * logf(value));
+    // Quantise:
+    return (char)(COLOUR_MAX * value);
 }

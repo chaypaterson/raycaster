@@ -10,6 +10,7 @@
  */
 
 #define COLOUR_MAX UCHAR_MAX
+//const static unsigned COLOUR_MAX = UCHAR_MAX;
 typedef unsigned char Pixel[3];
 
 // File operations:
@@ -27,7 +28,7 @@ double luma_y(Pixel colour);
 // Blend two colours, correcting for constant luminance:
 void mixcolours_y_corr(Pixel newcolour, double weight1, Pixel colour2);
 
-// quantise a floating point value to a char:
-char quantise(float colourch);
+// quantise a floating point value to a char after applying gamma correction:
+char quantise(float colourch, float sat, float gamma);
 
 #endif //PIXEL_H

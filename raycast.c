@@ -83,7 +83,7 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
 
         // Default scene geometry:
 
-        .geom.dims = {2, 2},
+        .geom.dims = {3, 3},
         .geom.centre = {0, 0, 0},
         .geom.tangent = {{0, 0, 0}, {0, 0, 0}},
 
