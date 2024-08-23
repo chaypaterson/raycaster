@@ -1,5 +1,4 @@
 #include "raycast.h"
-#include <stdio.h>
 
 /* raycast.c
  * Implementations for the functions declared in raycast.h. This library
@@ -211,11 +210,8 @@ void shoot_ray(Colour restrict result,
             // get the colour of this voxel and update result:
 
             for (char ch = 0; ch < 3; ++ch) {
-                printf("%d %d %d / %d %d %d\n", row, col, lyr, cube.resol.x,
-                cube.resol.y, cube.resol.z);
                 result[ch] += cube.buff[row][col][lyr][ch];
             }
-            printf("\n");
         }
 
         // TODO: if we have just left the cube, break immediately and don't wait
@@ -254,9 +250,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     // We will also want to use normal later:
     for (char axis = 0; axis < 3; ++axis) {
         normal[axis] *= -1.0 / dist;
-        printf("%g ", normal[axis]);
     }
-    printf("\n");
 
     // get the corner of the image plane, it will be useful later
 
@@ -296,10 +290,8 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
             // ray is now at the pixel coordinates in the scene. Cast this ray
             // in the direction "normal" (to the plane -- towards the cube)
 
-            printf("hello\n");
 
             Colour pixel = image_plane.buff[row][col];
-            printf("boo\n");
 
             shoot_ray(pixel, ray, normal, cube, tmax);
         }

@@ -44,7 +44,7 @@ void gradient_test() {
 int main() {
     // Test routines from raycast:
     struct VoxelCube cube = new_unit_cube(32, 32, 32);
-    struct ImagePlane plane = new_image_plane(64, 64);
+    struct ImagePlane plane = new_image_plane(640, 640);
 
     // Set scene geometry:
     orient_image_plane(&plane, cube, 2.0, 1.0f, 1.0f);
