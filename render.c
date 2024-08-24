@@ -69,20 +69,19 @@ int main() {
 
     // construct imaging plane:
     struct ImagePlane plane = new_image_plane(640, 640);
-    plane.geom.dims[0] = 2;
-    plane.geom.dims[1] = 2;
+    //plane.geom.dims[0] = 2;
+    //plane.geom.dims[1] = 2;
     printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
 
     // Set scene geometry:
-    double theta = M_PI * 0.25;
-    double phi = 1.0f;
+    double theta = 39 * M_PI / 150;//M_PI * 0.25;
+    double phi = 0.0f;
 
     // Create video with multiple views of the same cube:
-    int maxframes = 150;
+    int maxframes = 1;
 
     // TODO DEBUG: perspective looks weird at certain angles theta, clearly
     // there's a mistake with geometry somewhere
-    plane.geom.dims[0] *= 3;
 
     for (int frame = 0; frame < maxframes; ++frame) {
         orient_image_plane(&plane, cube, 2.0, theta, phi);
@@ -112,8 +111,8 @@ int main() {
 
         fclose(img);
 
-        phi += 2.0 * M_PI / maxframes;
-        //theta -= M_PI * 1.0 / maxframes;
+        //phi += 2.0 * M_PI / maxframes;
+        theta -= M_PI * 1.0 / maxframes;
     }
 
     free_unit_cube(cube);

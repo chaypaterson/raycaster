@@ -164,6 +164,7 @@ char is_inside_box(Vector point, struct VoxelCube box) {
     return test;
 }
 
+#include <stdio.h> // DEBUG
 void shoot_ray(Colour restrict result,
                Vector start, Vector dir, struct VoxelCube cube, double tmax) {
     // shoot a ray from start to start+tmax*dir
@@ -230,7 +231,6 @@ void shoot_ray(Colour restrict result,
     }
 }
 
-#include <stdio.h> // DEBUG
 void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     // Fill the image_plane's image buffer by casting rays onto the cube from
     // each pixel
@@ -249,6 +249,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
     dist = sqrt(dist);
     double tmax = 2 * dist;
+    printf("d = %g\n", dist);
 
     // We will also want to use normal later:
     for (char axis = 0; axis < 3; ++axis) {
@@ -292,6 +293,12 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
                 ray[axis] += delta;
             }
 
+            // DEBUG:
+            if (row == 0 && col == 0.5 * image_plane.resol.cols) {
+                printf("%d %d\n", row, col);
+                printf("[%g %g %g]\n", ray[0], ray[1], ray[2]);
+            }
+
             // ray is now at the pixel coordinates in the scene. Cast this ray
             // in the direction from the eye to the pixel.
             // Previous version: direction "normal" (to the plane -- towards the cube)
@@ -304,6 +311,11 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
             }
             norm = sqrt(norm);
             for (char axis = 0; axis < 3; ++axis) dirn[axis] /= norm;
+
+            // DEBUG:
+            if (row == 0 && col == 0.5 * image_plane.resol.cols) {
+                printf("[%g %g %g]\n", normal[0], normal[1], normal[2]);
+            }
 
             Colour pixel = image_plane.buff[row][col];
 
