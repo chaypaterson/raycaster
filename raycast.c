@@ -249,7 +249,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
     dist = sqrt(dist);
     double tmax = 2 * dist;
-    printf("d = %g\n", dist);
+    printf("d = %g (should be 2.0)\n", dist);
 
     // We will also want to use normal later:
     for (char axis = 0; axis < 3; ++axis) {
@@ -295,6 +295,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
             // DEBUG:
             if (row == 0 && col == 0.5 * image_plane.resol.cols) {
+                printf("Actual position of pixel:\n");
                 printf("%d %d\n", row, col);
                 printf("[%g %g %g]\n", ray[0], ray[1], ray[2]);
             }
@@ -314,6 +315,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
             // DEBUG:
             if (row == 0 && col == 0.5 * image_plane.resol.cols) {
+                printf("Actual normal:\n");
                 printf("[%g %g %g]\n", normal[0], normal[1], normal[2]);
             }
 

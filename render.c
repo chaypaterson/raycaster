@@ -99,6 +99,20 @@ int main() {
 
         for (unsigned row = 0; row < plane.resol.rows; ++row) {
             for (unsigned col = 0; col < plane.resol.cols; ++col) {
+                // DEBUG:
+                if (row == 0 && col == 0.5 * plane.resol.cols) {
+                    Vector ray;
+                    ray[0] = cube.geom.centre[0] + 2 * sin(theta) * cos(phi) - 0.5 * plane.geom.dims[0] * cos(theta) * cos(phi);
+                    ray[1] = cube.geom.centre[1] + 2 * sin(theta) * sin(phi) - 0.5 * plane.geom.dims[0] * cos(theta) * sin(phi);
+                    ray[2] = cube.geom.centre[2] + 2 * cos(theta) + 0.5 * plane.geom.dims[0] * sin(theta);
+                    printf("intended position of pixel:\n");
+                    printf("%d %d\n", row, col);
+                    printf("[%g %g %g]\n", ray[0], ray[1], ray[2]);
+                    printf("intended normal:\n");
+                    Vector normal = {-sin(theta) * cos(phi), -sin(theta) * sin(phi), -cos(theta)};
+                    printf("[%g %g %g]\n", normal[0], normal[1], normal[2]);
+                }
+
                 Pixel colour;
                 for (char ch = 0; ch < 3; ++ch) {
                     colour[ch] = quantise(plane.buff[row][col][ch], 1.0, 0.75);
