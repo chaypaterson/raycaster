@@ -138,7 +138,7 @@ void orient_image_plane(struct ImagePlane *image_plane,
 
     image_plane->geom.tangent[0][0] = cos(theta) * cos(phi);
     image_plane->geom.tangent[0][1] = cos(theta) * sin(phi);
-    image_plane->geom.tangent[0][2] = sin(theta);
+    image_plane->geom.tangent[0][2] = -sin(theta);
 
     // The "y" tangent vector (points to the next col) is the phi unit vector
     // in polar coords
@@ -231,6 +231,27 @@ void shoot_ray(Colour restrict result,
     }
 }
 
+void start_position(Vector ray, struct ImagePlane plane, 
+                    unsigned row, unsigned col) {
+    // get in-plane pixel coordinates relative to the centre:
+    double x = (plane.resol.rows - row) * 1.0 / plane.resol.rows - 0.5;
+    double y = (plane.resol.cols - col) * 1.0 / plane.resol.cols - 0.5;
+
+    x *= plane.geom.dims[0];
+    y *= plane.geom.dims[1];
+
+    // move x * tangent[0] + y * tangent[1] away from the centre:
+    for (char axis = 0; axis < 3; ++axis) {
+        ray[axis] = plane.geom.centre[axis];
+    }
+    for (char axis = 0; axis < 3; ++axis) {
+        ray[axis] += x * plane.geom.tangent[0][axis];
+    }
+    for (char axis = 0; axis < 3; ++axis) {
+        ray[axis] += y * plane.geom.tangent[1][axis];
+    }
+}
+
 void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     // Fill the image_plane's image buffer by casting rays onto the cube from
     // each pixel
@@ -276,23 +297,8 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
             // get scene coordinates of this pixel in the image plane
             Vector ray;
+            start_position(ray, image_plane, row, col);
             
-            // start at the plane corner and slide along the tangent vectors:
-            for (char axis = 0; axis < 3; ++axis) {
-                ray[axis] = corner[axis];
-                // first the x/row/theta direction:
-                double delta = image_plane.geom.tangent[0][axis];
-                delta *= image_plane.geom.dims[0];
-                delta *= row * 1.0 / image_plane.resol.rows;
-                ray[axis] += delta;
-
-                // then the y/col/phi direction:
-                delta = image_plane.geom.tangent[1][axis];
-                delta *= image_plane.geom.dims[1];
-                delta *= col * 1.0 / image_plane.resol.cols;
-                ray[axis] += delta;
-            }
-
             // DEBUG:
             if (row == 0 && col == 0.5 * image_plane.resol.cols) {
                 printf("Actual position of pixel:\n");

@@ -74,11 +74,11 @@ int main() {
     printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
 
     // Set scene geometry:
-    double theta = 39 * M_PI / 150;//M_PI * 0.25;
+    double theta = M_PI * 0.25;//39 * M_PI / 150;//M_PI * 0.25;
     double phi = 0.0f;
 
     // Create video with multiple views of the same cube:
-    int maxframes = 1;
+    int maxframes = 150;
 
     // TODO DEBUG: perspective looks weird at certain angles theta, clearly
     // there's a mistake with geometry somewhere
@@ -101,13 +101,6 @@ int main() {
             for (unsigned col = 0; col < plane.resol.cols; ++col) {
                 // DEBUG:
                 if (row == 0 && col == 0.5 * plane.resol.cols) {
-                    Vector ray;
-                    ray[0] = cube.geom.centre[0] + 2 * sin(theta) * cos(phi) - 0.5 * plane.geom.dims[0] * cos(theta) * cos(phi);
-                    ray[1] = cube.geom.centre[1] + 2 * sin(theta) * sin(phi) - 0.5 * plane.geom.dims[0] * cos(theta) * sin(phi);
-                    ray[2] = cube.geom.centre[2] + 2 * cos(theta) + 0.5 * plane.geom.dims[0] * sin(theta);
-                    printf("intended position of pixel:\n");
-                    printf("%d %d\n", row, col);
-                    printf("[%g %g %g]\n", ray[0], ray[1], ray[2]);
                     printf("intended normal:\n");
                     Vector normal = {-sin(theta) * cos(phi), -sin(theta) * sin(phi), -cos(theta)};
                     printf("[%g %g %g]\n", normal[0], normal[1], normal[2]);
