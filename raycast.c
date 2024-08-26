@@ -175,7 +175,7 @@ void shoot_ray(Colour restrict result,
     // choose a step: plausible step is cube dimensions / resolution
     double dt = cube.geom.dims[0] * 1.0 / cube.resol.x;
 
-    double extinction = 1.00; // TESTING
+    double extinction = 0.80; // TESTING
     double weight = 1.0;
 
     // compute this once and use it later:

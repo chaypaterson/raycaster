@@ -41,6 +41,34 @@ void gradient_test() {
     fclose(img);
 }
 
+void draw_frame(struct VoxelCube cube) {
+    // Draw a white cage:
+    for (unsigned row = 0; row < cube.resol.x; ++row) {
+        for (char ch = 0; ch < 3; ++ch) {
+            cube.buff[row][0][0][ch] = 100;
+            cube.buff[row][cube.resol.y-1][0][ch] = 100;
+            cube.buff[row][0][cube.resol.z-1][ch] = 100;
+            cube.buff[row][cube.resol.y-1][cube.resol.z-1][ch] = 100;
+        }
+    }
+    for (unsigned col = 0; col < cube.resol.y; ++col) {
+        for (char ch = 0; ch < 3; ++ch) {
+            cube.buff[0][col][0][ch] = 100;
+            cube.buff[cube.resol.x-1][col][0][ch] = 100;
+            cube.buff[0][col][cube.resol.z-1][ch] = 100;
+            cube.buff[cube.resol.x-1][col][cube.resol.z-1][ch] = 100;
+        }
+    }
+    for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+        for (char ch = 0; ch < 3; ++ch) {
+            cube.buff[0][0][lyr][ch] = 100;
+            cube.buff[cube.resol.x-1][0][lyr][ch] = 100;
+            cube.buff[0][cube.resol.y-1][lyr][ch] = 100;
+            cube.buff[cube.resol.x-1][cube.resol.y-1][lyr][ch] = 100;
+        }
+    }
+}
+
 int main() {
     // Construct voxel cube:
     struct VoxelCube cube = new_unit_cube(32, 32, 32);
@@ -63,6 +91,8 @@ int main() {
             }
         }
     }
+    
+    draw_frame(cube);
 
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
@@ -74,14 +104,11 @@ int main() {
     printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
 
     // Set scene geometry:
-    double theta = M_PI * 0.25;//39 * M_PI / 150;//M_PI * 0.25;
+    double theta = -M_PI * 0.25;//39 * M_PI / 150;//M_PI * 0.25;
     double phi = 0.0f;
 
     // Create video with multiple views of the same cube:
     int maxframes = 150;
-
-    // TODO DEBUG: perspective looks weird at certain angles theta, clearly
-    // there's a mistake with geometry somewhere
 
     for (int frame = 0; frame < maxframes; ++frame) {
         orient_image_plane(&plane, cube, 2.0, theta, phi);
@@ -113,7 +140,7 @@ int main() {
         fclose(img);
 
         phi += 2.0 * M_PI / maxframes;
-        theta += 0.125 * M_PI * sin(frame * M_PI * 2.0 / maxframes);
+        theta += 0.25 * sin(frame * M_PI * 2.0 / maxframes) * 2.0 * M_PI/ maxframes;
     }
 
     free_unit_cube(cube);
