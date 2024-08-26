@@ -164,7 +164,6 @@ char is_inside_box(Vector point, struct VoxelCube box) {
     return test;
 }
 
-#include <stdio.h> // DEBUG
 void shoot_ray(Colour restrict result,
                Vector start, Vector dir, struct VoxelCube cube, double tmax) {
     // shoot a ray from start to start+tmax*dir
@@ -252,6 +251,19 @@ void start_position(Vector ray, struct ImagePlane plane,
     }
 }
 
+void get_eye_direction(Vector dirn, struct ImagePlane plane, Vector ray) {
+    // initially set dirn = ray - eye position
+    double norm = 0;
+    for (char axis = 0; axis < 3; ++axis) {
+        dirn[axis] = ray[axis] - plane.geom.eye[axis];
+        norm += dirn[axis] * dirn[axis];
+    }
+    norm = sqrt(norm);
+    // Normalise direction vector:
+    for (char axis = 0; axis < 3; ++axis) 
+        dirn[axis] /= norm;
+}
+
 void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     // Fill the image_plane's image buffer by casting rays onto the cube from
     // each pixel
@@ -270,7 +282,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
     dist = sqrt(dist);
     double tmax = 2 * dist;
-    printf("d = %g (should be 2.0)\n", dist);
+    //printf("d = %g (should be 2.0)\n", dist); // TODO DEBUG
 
     // We will also want to use normal later:
     for (char axis = 0; axis < 3; ++axis) {
@@ -295,35 +307,16 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
-            // get scene coordinates of this pixel in the image plane
+            // set scene coordinates of this pixel in the image plane
             Vector ray;
             start_position(ray, image_plane, row, col);
             
-            // DEBUG:
-            if (row == 0 && col == 0.5 * image_plane.resol.cols) {
-                printf("Actual position of pixel:\n");
-                printf("%d %d\n", row, col);
-                printf("[%g %g %g]\n", ray[0], ray[1], ray[2]);
-            }
-
             // ray is now at the pixel coordinates in the scene. Cast this ray
             // in the direction from the eye to the pixel.
             // Previous version: direction "normal" (to the plane -- towards the cube)
 
             Vector dirn;
-            double norm = 0;
-            for (char axis = 0; axis < 3; ++axis) {
-                dirn[axis] = ray[axis] - image_plane.geom.eye[axis];
-                norm += dirn[axis] * dirn[axis];
-            }
-            norm = sqrt(norm);
-            for (char axis = 0; axis < 3; ++axis) dirn[axis] /= norm;
-
-            // DEBUG:
-            if (row == 0 && col == 0.5 * image_plane.resol.cols) {
-                printf("Actual normal:\n");
-                printf("[%g %g %g]\n", normal[0], normal[1], normal[2]);
-            }
+            get_eye_direction(dirn, image_plane, ray);
 
             Colour pixel = image_plane.buff[row][col];
 

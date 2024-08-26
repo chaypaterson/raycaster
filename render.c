@@ -69,8 +69,8 @@ int main() {
 
     // construct imaging plane:
     struct ImagePlane plane = new_image_plane(640, 640);
-    //plane.geom.dims[0] = 2;
-    //plane.geom.dims[1] = 2;
+    plane.geom.dims[0] = 2;
+    plane.geom.dims[1] = 2;
     printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
 
     // Set scene geometry:
@@ -92,22 +92,16 @@ int main() {
         // quantise colours and write out plane image buffer:
         char frameppm[sizeof("frame000.ppm")];
         sprintf(frameppm, "frame%03d.ppm", frame);
-        //FILE* img = fopen("rendering1.ppm", "w");
+
         FILE* img = fopen(frameppm, "w");
 
         putheader(img, plane.resol.cols, plane.resol.rows);
 
         for (unsigned row = 0; row < plane.resol.rows; ++row) {
             for (unsigned col = 0; col < plane.resol.cols; ++col) {
-                // DEBUG:
-                if (row == 0 && col == 0.5 * plane.resol.cols) {
-                    printf("intended normal:\n");
-                    Vector normal = {-sin(theta) * cos(phi), -sin(theta) * sin(phi), -cos(theta)};
-                    printf("[%g %g %g]\n", normal[0], normal[1], normal[2]);
-                }
-
                 Pixel colour;
                 for (char ch = 0; ch < 3; ++ch) {
+                    // Quantise with a saturation value and gamma correction:
                     colour[ch] = quantise(plane.buff[row][col][ch], 1.0, 0.75);
                     // wipe the image plane buffer:
                     plane.buff[row][col][ch] = 0.0f;
@@ -118,8 +112,8 @@ int main() {
 
         fclose(img);
 
-        //phi += 2.0 * M_PI / maxframes;
-        theta -= M_PI * 1.0 / maxframes;
+        phi += 2.0 * M_PI / maxframes;
+        theta += 0.125 * M_PI * sin(frame * M_PI * 2.0 / maxframes);
     }
 
     free_unit_cube(cube);
