@@ -44,18 +44,21 @@ typedef float *Colour; // A Colour is an array of 3 floats: one per RGB channel.
 typedef double Vector[3]; // A point in space or a direction.
 
 struct ImagePlane {
+    // Resolution of image formed on plane:
     struct {
         unsigned rows, cols;
     } resol;
 
+    // Geometry of the plane in the scene:
     struct {
         double dims[2]; // Dimensions of the plane
         Vector centre;
         Vector tangent[2]; // Two tangent vectors. See note below about buffer.
-        Vector eye; // The eye from which rays are cast
+        Vector eye; // The eye from which rays are cast (optional)
     } geom;
 
-    Colour **buff; // Buffer containing the contents of the image
+    // Buffer containing the contents of the image:
+    Colour **buff;
     // The buffer should be accessed like:
     //          this.buff[row][col]
     // Note: that the image buffer is row-major: the "x" tangent vector points
@@ -64,20 +67,25 @@ struct ImagePlane {
 };
 
 struct VoxelCube {
+    // Resolution of the cube:
     struct {
-        unsigned x, y, z; // TODO better names? not important?
+        unsigned x, y, z; // TODO better names? how important?
     } resol;
 
+    // The geometry of the cube: 
     struct {
-        // The geometry of the cube is trivial but we may as well store its
+        // This is currently trivial but we may as well store its
         // orientation for consistency and generalisability:
         double dims[3]; // dimensions of the cube
         Vector centre;
         Vector orient[3]; // Orientation of the cube
+        double extinction; // Opacity of the cube. 1.0 = transparent,
+        // 0.0=completely opaque. TODO really we should give individual voxels
+        // an alpha channel.
     } geom;
 
     Colour ***buff; // Buffer containing the contents of the voxel cloud
-    // A voxel is just a colour.
+    // A voxel is a floating-point colour tuple.
     // The buffer should be accessed like:
     //          this.buff[row][col][layer]
 };

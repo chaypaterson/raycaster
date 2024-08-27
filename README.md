@@ -12,5 +12,6 @@ It compiles with
 
 Running `./renderer` then produces a PPM image in binary format.
 
-Note: compiling raycast.c with optimisation levels higher than -O1 results in
-errors and is not recommended.
+Note: compiling raycast.c with optimisation levels higher than -O1 under clang
+results in unexpected behaviour and is not recommended. With GCC this doesn't
+seem to happen.

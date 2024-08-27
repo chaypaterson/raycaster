@@ -32,12 +32,17 @@ struct VoxelCube new_unit_cube(unsigned res_x, unsigned res_y, unsigned res_z) {
         .resol.y = res_y,
         .resol.z = res_z,
 
+        // Default: unit cube centred on 1/2,1/2,1/2 and oriented in the obvious
+        // way:
         .geom.dims = {1, 1, 1},
         .geom.centre = {0.5, 0.5, 0.5},
         .geom.orient = {{1, 0, 0},
                         {0, 1, 0},
                         {0, 0, 1},
                         },
+
+        // Default: cube should be transparent
+        .geom.extinction = 1.0,
 
         .buff = buff
     };
@@ -164,6 +169,23 @@ char is_inside_box(Vector point, struct VoxelCube box) {
     return test;
 }
 
+unsigned roundcoord(unsigned side_resolution, double difference) {
+    // round a difference coordinate (i.e. relative to the bounding cube) to an
+    // integer coordinate for the nearest voxel
+    unsigned rounded = (0.5 + side_resolution * difference);
+    // Note: I prefer multiplying by tests here to avoid branching. This is a
+    // library, the compiler might not optimise branches away.
+
+    // bounds checking: ensure that the result does not exceed the resolution
+    // rounded = min(side_resolution - 1, rounded)
+    rounded += (side_resolution - 1 - rounded) * (rounded >= side_resolution);
+    // ensure positivity:
+    // rounded = max(rounded, 0)
+    rounded += -rounded * (rounded < 0);
+
+    return rounded;
+}
+
 void shoot_ray(Colour restrict result,
                Vector start, Vector dir, struct VoxelCube cube, double tmax) {
     // shoot a ray from start to start+tmax*dir
@@ -175,8 +197,7 @@ void shoot_ray(Colour restrict result,
     // choose a step: plausible step is cube dimensions / resolution
     double dt = cube.geom.dims[0] * 1.0 / cube.resol.x;
 
-    double extinction = 0.80; // TESTING
-    double weight = 1.0;
+    double transmission = 1.0; // use this to model extinction/opacity of the voxels
 
     // compute this once and use it later:
     Vector corner; // of the cube
@@ -203,29 +224,17 @@ void shoot_ray(Colour restrict result,
             }
 
             // round position in cube to nearest voxel:
-            unsigned row = (0.5 + cube.resol.x * difference[0]);
-            unsigned col = (0.5 + cube.resol.y * difference[1]);
-            unsigned lyr = (0.5 + cube.resol.z * difference[2]);
-
-            // Note: I prefer multiplying by tests here to avoid branching
-
-            // bounds checking: ensure that none of these exceed the resolution
-            row += (cube.resol.x - 1 - row) * (row >= cube.resol.x);
-            col += (cube.resol.y - 1 - col) * (col >= cube.resol.y);
-            lyr += (cube.resol.z - 1 - lyr) * (lyr >= cube.resol.z);
-
-            // and are all positive
-            row += -row * (row < 0);
-            col += -col * (col < 0);
-            lyr += -lyr * (lyr < 0);
+            unsigned row = roundcoord(cube.resol.x, difference[0]);
+            unsigned col = roundcoord(cube.resol.y, difference[1]);
+            unsigned lyr = roundcoord(cube.resol.z, difference[2]);
 
             // get the colour of this voxel and update result:
-
             for (char ch = 0; ch < 3; ++ch) {
-                result[ch] += cube.buff[row][col][lyr][ch] * dt * weight;
+                result[ch] += cube.buff[row][col][lyr][ch] * dt * transmission;
             }
 
-            weight *= extinction;
+            /* TODO voxels could have alpha channels instead? */
+            transmission *= cube.geom.extinction;
         }
     }
 }

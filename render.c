@@ -71,7 +71,7 @@ void draw_frame(struct VoxelCube cube) {
 
 int main() {
     // Construct voxel cube:
-    struct VoxelCube cube = new_unit_cube(32, 32, 32);
+    struct VoxelCube cube = new_unit_cube(64, 64, 64);
 
     // Fill cube with stuff:
     for (unsigned row = 0; row < cube.resol.x; ++row) {
@@ -92,8 +92,6 @@ int main() {
         }
     }
     
-    draw_frame(cube);
-
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
 
@@ -104,7 +102,7 @@ int main() {
     printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
 
     // Set scene geometry:
-    double theta = -M_PI * 0.25;//39 * M_PI / 150;//M_PI * 0.25;
+    double theta = -M_PI * 0.25;
     double phi = 0.0f;
 
     // Create video with multiple views of the same cube:
