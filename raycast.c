@@ -276,6 +276,14 @@ void get_eye_direction(Vector dirn, struct ImagePlane plane, Vector ray) {
         dirn[axis] /= norm;
 }
 
+void randomise(Vector dirn, double epsilon) {
+    // add tiny random offsets to the direction as an antialiasing measure
+    for (char axis = 0; axis < 3; ++axis) {
+        dirn[axis] += epsilon * rand() / RAND_MAX;
+        dirn[axis] -= epsilon * 0.5; // epsilon should have zero mean
+    }
+}
+
 void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     // Fill the image_plane's image buffer by casting rays onto the cube from
     // each pixel
@@ -297,26 +305,14 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     double tmax = 2 * dist;
     //printf("d = %g (should be 2.0)\n", dist); // TODO DEBUG
 
-    // We will also want to use normal later:
+    // We will also want to use the normal later:
     for (char axis = 0; axis < 3; ++axis) {
         normal[axis] *= -1.0 / dist;
     }
 
-    // get the corner of the image plane, it will be useful later
-
-    Vector corner;
-    for (char axis = 0; axis < 3; ++axis) {
-        corner[axis] = image_plane.geom.centre[axis];
-
-        // go backwards from the centre along the plane tangent vectors:
-        for (char tang_ax = 0; tang_ax < 2; ++tang_ax) {
-            double delta = image_plane.geom.tangent[tang_ax][axis];
-            // across half the width or height of the plane:
-            delta *= image_plane.geom.dims[tang_ax];
-            delta *= 0.5;
-            corner[axis] -= delta;
-        }
-    }
+    // coefficient for stochastic ray tracing
+    double epsilon = 2.0f / (image_plane.resol.rows);
+    srand(0);
 
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
@@ -326,14 +322,17 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
             
             // ray is now at the pixel coordinates in the scene. Cast this ray
             // in the direction from the eye to the pixel.
-            //Vector dirn;
+            Vector dirn;
             //get_eye_direction(dirn, image_plane, ray);
 
             // Previous version: direction "normal" (to the plane -- towards the cube)
+            for (char axis = 0; axis < 3; ++axis) dirn[axis] = normal[axis];
+            // Try adding tiny random offsets to the direction to antialias:
+            randomise(dirn, epsilon);
 
             Colour pixel = image_plane.buff[row][col];
 
-            shoot_ray(pixel, ray, normal, cube, tmax);
+            shoot_ray(pixel, ray, dirn, cube, tmax);
         }
     }
 }
