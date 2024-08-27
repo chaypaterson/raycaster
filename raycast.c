@@ -66,6 +66,70 @@ void free_unit_cube(struct VoxelCube unitcube) {
     free(unitcube.buff);
 }
 
+// file management: load and save voxel cube data
+#include <stdio.h>
+#include <string.h>
+void save_cube(struct VoxelCube cube, char *filename) {
+    // Save a cube's voxel buffer to a file
+    FILE *file = fopen(filename, "wb");
+    const char signature[6] = "Voxel\n";
+    fwrite(signature, sizeof(char), 6, file);
+
+    // write resolution to file
+    unsigned resol[3] = {cube.resol.x, cube.resol.y, cube.resol.z};
+    fwrite(resol, sizeof(unsigned), 3, file);
+
+    // write voxels to file
+    for (unsigned row = 0; row < cube.resol.x; ++row) {
+        for (unsigned col = 0; col < cube.resol.y; ++col) {
+            for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+                fwrite(cube.buff[row][col][lyr], sizeof(float), 3, file);
+            }
+        }
+    }
+
+    fclose(file);
+}
+
+struct VoxelCube load_cube(char *filename) {
+    // Read from a file into a voxel cube
+    // The file format is: the first 6 characters are "Voxel\n", followed by
+    // three unsigned integers: the dimensions of the cube. The rest of the file
+    // consists of the contents of the voxel colour buffer.
+    FILE *file = fopen(filename, "rb");
+    // TODO 6 is a magic number here
+    const char signature[6] = "Voxel\n";
+
+    char header[6];
+    fread(header, sizeof(char), 6, file);
+    // check these two are equal:
+    if (!strcmp(signature, header)) {
+        printf("Wrong input file type for voxel cube\n");
+        printf("%s vs %s\n", header, signature);
+        exit(1);
+    }
+
+    unsigned resol[3]; // 3D resolution of cube
+    fread(resol, sizeof(unsigned), 3, file);
+
+    struct VoxelCube cube = new_unit_cube(resol[0], resol[1], resol[2]);
+
+    // Load voxels:
+    for (unsigned row = 0; row < cube.resol.x; ++row) {
+        for (unsigned col = 0; col < cube.resol.y; ++col) {
+            for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+                fread(cube.buff[row][col][lyr], sizeof(float), 3, file);
+            }
+        }
+    }
+
+    fclose(file);
+
+    return cube;
+}
+
+
+
 struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
     // Return an image plane with the specified resolution in a default location
     // and orientation in the scene.

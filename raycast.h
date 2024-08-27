@@ -96,6 +96,10 @@ struct VoxelCube new_unit_cube(unsigned res_x, unsigned res_y, unsigned res_z);
 // Free the memory in the image buffer of the unit cube:
 void free_unit_cube(struct VoxelCube unitcube);
 
+// Save and load cubes to and from files:
+void save_cube(struct VoxelCube cube, char *filename);
+struct VoxelCube load_cube(char *filename);
+
 // Construct and return a new image plane with the specified resolution:
 struct ImagePlane new_image_plane(unsigned rows, unsigned cols);
 
