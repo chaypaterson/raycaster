@@ -186,6 +186,14 @@ unsigned roundcoord(unsigned side_resolution, double difference) {
     return rounded;
 }
 
+void randomise(Vector dirn, double epsilon) {
+    // add tiny random offsets to the direction as an antialiasing measure
+    for (char axis = 0; axis < 3; ++axis) {
+        dirn[axis] += epsilon * rand() / RAND_MAX;
+        dirn[axis] -= epsilon * 0.5; // epsilon should have zero mean
+    }
+}
+
 void shoot_ray(Colour restrict result,
                Vector start, Vector dir, struct VoxelCube cube, double tmax) {
     // shoot a ray from start to start+tmax*dir
@@ -276,14 +284,6 @@ void get_eye_direction(Vector dirn, struct ImagePlane plane, Vector ray) {
         dirn[axis] /= norm;
 }
 
-void randomise(Vector dirn, double epsilon) {
-    // add tiny random offsets to the direction as an antialiasing measure
-    for (char axis = 0; axis < 3; ++axis) {
-        dirn[axis] += epsilon * rand() / RAND_MAX;
-        dirn[axis] -= epsilon * 0.5; // epsilon should have zero mean
-    }
-}
-
 void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     // Fill the image_plane's image buffer by casting rays onto the cube from
     // each pixel
@@ -312,7 +312,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
     // coefficient for stochastic ray tracing
     double epsilon = 2.0f / (image_plane.resol.rows);
-    srand(0);
+    //srand(0);
 
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
@@ -328,7 +328,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
             // Previous version: direction "normal" (to the plane -- towards the cube)
             for (char axis = 0; axis < 3; ++axis) dirn[axis] = normal[axis];
             // Try adding tiny random offsets to the direction to antialias:
-            randomise(dirn, epsilon);
+            //randomise(dirn, epsilon);
 
             Colour pixel = image_plane.buff[row][col];
 
