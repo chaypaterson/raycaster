@@ -106,11 +106,12 @@ void draw_rgb(struct VoxelCube cube) {
     }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    // TODO choose to load cube from file/save depending on argv
     // Construct voxel cube:
     struct VoxelCube cube = new_unit_cube(64, 64, 64);
 
-    // Fill cube with stuff:
+    // Fill a default cube with stuff:
     draw_rgb(cube);
     //draw_frame(cube);
     draw_axes(cube);
@@ -121,7 +122,6 @@ int main() {
     free_unit_cube(cube); // flush the cube buffer
     printf("Loading cube...\n");
     cube = load_cube("rgb.cube"); // reload
-    cube.geom.extinction = 0.85;// cube transparency // TODO not currently saved
 
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
