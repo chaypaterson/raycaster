@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// This program prints a binary PPM image to a file.
+// This program renders images to PPM files.
 
 #include "pixel.h"
 #include "raycast.h"
@@ -69,11 +69,8 @@ void draw_frame(struct VoxelCube cube) {
     }
 }
 
-int main() {
-    // Construct voxel cube:
-    struct VoxelCube cube = new_unit_cube(64, 64, 64);
-
-    // Fill cube with stuff:
+void draw_rgb(struct VoxelCube cube) {
+    // Draw an RGB cube in the voxel buffer:
     for (unsigned row = 0; row < cube.resol.x; ++row) {
         for (unsigned col = 0; col < cube.resol.y; ++col) {
             for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
@@ -91,7 +88,81 @@ int main() {
             }
         }
     }
+}
+
+void save_cube(struct VoxelCube cube, char *filename) {
+    // Save a cube's voxel buffer to a file
+    FILE *file = fopen(filename, "wb");
+    const char signature[6] = "Voxel\n";
+    fwrite(signature, sizeof(char), 6, file);
+
+    // write resolution to file
+    unsigned resol[3] = {cube.resol.x, cube.resol.y, cube.resol.z};
+    fwrite(resol, sizeof(unsigned), 3, file);
+
+    // write voxels to file
+    for (unsigned row = 0; row < cube.resol.x; ++row) {
+        for (unsigned col = 0; col < cube.resol.y; ++col) {
+            for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+                fwrite(cube.buff[row][col][lyr], sizeof(float), 3, file);
+            }
+        }
+    }
+
+    fclose(file);
+}
+
+struct VoxelCube load_cube(char *filename) {
+    // Read from a file into a voxel cube
+    // The file format is: the first 6 characters are "Voxel\n", followed by
+    // three unsigned integers: the dimensions of the cube. The rest of the file
+    // consists of the contents of the voxel colour buffer.
+    FILE *file = fopen(filename, "rb");
+    // TODO 6 is a magic number here
+    const char signature[6] = "Voxel\n";
+
+    char header[6];
+    fread(header, sizeof(char), 6, file);
+    // check these two are equal:
+    if (!strcmp(signature, header)) {
+        printf("Wrong input file type for voxel cube\n");
+        printf("%s vs %s\n", header, signature);
+        exit(1);
+    }
+
+    unsigned resol[3]; // 3D resolution of cube
+    fread(resol, sizeof(unsigned), 3, file);
+
+    struct VoxelCube cube = new_unit_cube(resol[0], resol[1], resol[2]);
+
+    // Load voxels:
+    for (unsigned row = 0; row < cube.resol.x; ++row) {
+        for (unsigned col = 0; col < cube.resol.y; ++col) {
+            for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+                fread(cube.buff[row][col][lyr], sizeof(float), 3, file);
+            }
+        }
+    }
+
+    fclose(file);
+
+    return cube;
+}
+
+int main() {
+    // Construct voxel cube:
+    struct VoxelCube cube = new_unit_cube(64, 64, 64);
+
+    // Fill cube with stuff:
+    draw_rgb(cube);
     draw_frame(cube);
+
+    // Try saving and loading cube:
+    printf("Saving cube...\n");
+    save_cube(cube, "rgb.cube");
+    free_unit_cube(cube); // flush the cube buffer
+    printf("Loading cube...\n");
+    cube = load_cube("rgb.cube"); // reload
 
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
