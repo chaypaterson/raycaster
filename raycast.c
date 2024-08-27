@@ -208,6 +208,8 @@ void shoot_ray(Colour restrict result,
     Vector ray; // shoot this ray
 
     for (double t = 0; t < tmax; t += dt) {
+        // compute position of tip of the ray:
+        // ray = start + t * dir
         for (char axis = 0; axis < 3; ++axis) {
             ray[axis] = start[axis];
             ray[axis] += t * dir[axis];
@@ -223,6 +225,7 @@ void shoot_ray(Colour restrict result,
                 difference[axis] /= cube.geom.dims[axis];
             }
 
+            // Nearest neighbour interpolation:
             // round position in cube to nearest voxel:
             unsigned row = roundcoord(cube.resol.x, difference[0]);
             unsigned col = roundcoord(cube.resol.y, difference[1]);
@@ -241,7 +244,7 @@ void shoot_ray(Colour restrict result,
 
 void start_position(Vector ray, struct ImagePlane plane, 
                     unsigned row, unsigned col) {
-    // get in-plane pixel coordinates relative to the centre:
+    // get in-plane pixel coordinates relative to the plane's centre:
     double x = (plane.resol.rows - row) * 1.0 / plane.resol.rows - 0.5;
     double y = (plane.resol.cols - col) * 1.0 / plane.resol.cols - 0.5;
 
@@ -281,6 +284,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
     // guess a tmax: twice the distance from the centre of the cube to the
     // centre of the plane.
+    // At the same time, compute and store a unit normal for the plane
     Vector normal;
     double dist;
 
@@ -322,10 +326,10 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
             
             // ray is now at the pixel coordinates in the scene. Cast this ray
             // in the direction from the eye to the pixel.
-            // Previous version: direction "normal" (to the plane -- towards the cube)
+            //Vector dirn;
+            //get_eye_direction(dirn, image_plane, ray);
 
-            Vector dirn;
-            get_eye_direction(dirn, image_plane, ray);
+            // Previous version: direction "normal" (to the plane -- towards the cube)
 
             Colour pixel = image_plane.buff[row][col];
 

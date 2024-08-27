@@ -7,3 +7,4 @@ example-images
 *.dSYM
 *.mp4
 *.webm
+nohup.out
