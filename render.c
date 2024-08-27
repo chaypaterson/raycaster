@@ -100,12 +100,7 @@ void draw_rgb(struct VoxelCube cube) {
                                   col * 1.0f / cube.resol.y,
                                   lyr * 1.0f / cube.resol.z};
 
-                for (char ch = 0; ch < 3; ++ch) {
-                    // TODO: number of channels is usually 3 but this should
-                    // really be a variable defined in a header file. what if we
-                    // wanted an alpha channel?
-                    cube.buff[row][col][lyr][ch] = voxel[ch];
-                }
+                memcpy(cube.buff[row][col][lyr], voxel, Colour_size);
             }
         }
     }
