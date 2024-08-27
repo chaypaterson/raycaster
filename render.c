@@ -44,27 +44,48 @@ void gradient_test() {
 void draw_frame(struct VoxelCube cube) {
     // Draw a white cage:
     for (unsigned row = 0; row < cube.resol.x; ++row) {
+        for (unsigned col = 0; col < cube.resol.y; col += cube.resol.y-1) {
+            for (unsigned lyr = 0; lyr < cube.resol.z; lyr += cube.resol.z-1) {
+                for (char ch = 0; ch < 3; ++ch) {
+                    cube.buff[row][col][lyr][ch] = 100;
+                }
+            }
+        }
+    }
+    for (unsigned col = 0; col < cube.resol.y; ++col) {
+        for (unsigned row = 0; row < cube.resol.x; row += cube.resol.x-1) {
+            for (unsigned lyr = 0; lyr < cube.resol.z; lyr += cube.resol.z-1) {
+                for (char ch = 0; ch < 3; ++ch) {
+                    cube.buff[row][col][lyr][ch] = 100;
+                }
+            }
+        }
+    }
+    for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+        for (unsigned col = 0; col < cube.resol.y; col += cube.resol.y-1) {
+            for (unsigned row = 0; row < cube.resol.x; row += cube.resol.x-1) {
+                for (char ch = 0; ch < 3; ++ch) {
+                    cube.buff[row][col][lyr][ch] = 100;
+                }
+            }
+        }
+    }
+}
+
+void draw_axes(struct VoxelCube cube) {
+    for (unsigned row = 0; row < cube.resol.x; ++row) {
         for (char ch = 0; ch < 3; ++ch) {
             cube.buff[row][0][0][ch] = 100;
-            cube.buff[row][cube.resol.y-1][0][ch] = 100;
-            cube.buff[row][0][cube.resol.z-1][ch] = 100;
-            cube.buff[row][cube.resol.y-1][cube.resol.z-1][ch] = 100;
         }
     }
     for (unsigned col = 0; col < cube.resol.y; ++col) {
         for (char ch = 0; ch < 3; ++ch) {
             cube.buff[0][col][0][ch] = 100;
-            cube.buff[cube.resol.x-1][col][0][ch] = 100;
-            cube.buff[0][col][cube.resol.z-1][ch] = 100;
-            cube.buff[cube.resol.x-1][col][cube.resol.z-1][ch] = 100;
         }
     }
     for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
         for (char ch = 0; ch < 3; ++ch) {
             cube.buff[0][0][lyr][ch] = 100;
-            cube.buff[cube.resol.x-1][0][lyr][ch] = 100;
-            cube.buff[0][cube.resol.y-1][lyr][ch] = 100;
-            cube.buff[cube.resol.x-1][cube.resol.y-1][lyr][ch] = 100;
         }
     }
 }
@@ -97,21 +118,7 @@ int main() {
     // Fill cube with stuff:
     draw_rgb(cube);
     //draw_frame(cube);
-    for (unsigned row = 0; row < cube.resol.x; ++row) {
-        for (char ch = 0; ch < 3; ++ch) {
-            cube.buff[row][0][0][ch] = 100;
-        }
-    }
-    for (unsigned col = 0; col < cube.resol.y; ++col) {
-        for (char ch = 0; ch < 3; ++ch) {
-            cube.buff[0][col][0][ch] = 100;
-        }
-    }
-    for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
-        for (char ch = 0; ch < 3; ++ch) {
-            cube.buff[0][0][lyr][ch] = 100;
-        }
-    }
+    draw_axes(cube);
 
     // Try saving and loading cube:
     printf("Saving cube...\n");
@@ -119,6 +126,7 @@ int main() {
     free_unit_cube(cube); // flush the cube buffer
     printf("Loading cube...\n");
     cube = load_cube("rgb.cube"); // reload
+    cube.geom.extinction = 0.85;// cube transparency // TODO not currently saved
 
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
