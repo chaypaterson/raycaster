@@ -46,7 +46,7 @@ void draw_frame(struct VoxelCube cube) {
     for (unsigned row = 0; row < cube.resol.x; ++row) {
         for (unsigned col = 0; col < cube.resol.y; col += cube.resol.y-1) {
             for (unsigned lyr = 0; lyr < cube.resol.z; lyr += cube.resol.z-1) {
-                for (char ch = 0; ch < 3; ++ch) {
+                for (char ch = 0; ch < VChannels; ++ch) {
                     cube.buff[row][col][lyr][ch] = 100;
                 }
             }
@@ -55,7 +55,7 @@ void draw_frame(struct VoxelCube cube) {
     for (unsigned col = 0; col < cube.resol.y; ++col) {
         for (unsigned row = 0; row < cube.resol.x; row += cube.resol.x-1) {
             for (unsigned lyr = 0; lyr < cube.resol.z; lyr += cube.resol.z-1) {
-                for (char ch = 0; ch < 3; ++ch) {
+                for (char ch = 0; ch < VChannels; ++ch) {
                     cube.buff[row][col][lyr][ch] = 100;
                 }
             }
@@ -64,7 +64,7 @@ void draw_frame(struct VoxelCube cube) {
     for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
         for (unsigned col = 0; col < cube.resol.y; col += cube.resol.y-1) {
             for (unsigned row = 0; row < cube.resol.x; row += cube.resol.x-1) {
-                for (char ch = 0; ch < 3; ++ch) {
+                for (char ch = 0; ch < VChannels; ++ch) {
                     cube.buff[row][col][lyr][ch] = 100;
                 }
             }
@@ -74,17 +74,17 @@ void draw_frame(struct VoxelCube cube) {
 
 void draw_axes(struct VoxelCube cube) {
     for (unsigned row = 0; row < cube.resol.x; ++row) {
-        for (char ch = 0; ch < 3; ++ch) {
+        for (char ch = 0; ch < VChannels; ++ch) {
             cube.buff[row][0][0][ch] = 100;
         }
     }
     for (unsigned col = 0; col < cube.resol.y; ++col) {
-        for (char ch = 0; ch < 3; ++ch) {
+        for (char ch = 0; ch < VChannels; ++ch) {
             cube.buff[0][col][0][ch] = 100;
         }
     }
     for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
-        for (char ch = 0; ch < 3; ++ch) {
+        for (char ch = 0; ch < VChannels; ++ch) {
             cube.buff[0][0][lyr][ch] = 100;
         }
     }
@@ -156,7 +156,7 @@ int main(int argc, char* argv[]) {
         for (unsigned row = 0; row < plane.resol.rows; ++row) {
             for (unsigned col = 0; col < plane.resol.cols; ++col) {
                 Pixel colour;
-                for (char ch = 0; ch < 3; ++ch) {
+                for (char ch = 0; ch < VChannels; ++ch) {
                     // Quantise with a saturation value and gamma correction:
                     colour[ch] = quantise(plane.buff[row][col][ch], 1.0, 0.75);
                     // wipe the image plane buffer:

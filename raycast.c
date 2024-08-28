@@ -20,7 +20,7 @@ struct VoxelCube new_unit_cube(unsigned res_x, unsigned res_y, unsigned res_z) {
             buff[ix][iy] = malloc(sizeof(Colour[res_z]));
             for (unsigned iz = 0; iz < res_z; ++iz) {
                 buff[ix][iy][iz] = malloc(Colour_size);
-                for (char ch = 0; ch < 3; ++ch) {
+                for (char ch = 0; ch < VChannels; ++ch) {
                     buff[ix][iy][iz][ch] = 0;
                 }
             }
@@ -83,7 +83,7 @@ void save_cube(struct VoxelCube cube, char *filename) {
     for (unsigned row = 0; row < cube.resol.x; ++row) {
         for (unsigned col = 0; col < cube.resol.y; ++col) {
             for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
-                fwrite(cube.buff[row][col][lyr], sizeof(float), 3, file);
+                fwrite(cube.buff[row][col][lyr], sizeof(float), VChannels, file);
             }
         }
     }
@@ -118,7 +118,7 @@ struct VoxelCube load_cube(char *filename) {
     for (unsigned row = 0; row < cube.resol.x; ++row) {
         for (unsigned col = 0; col < cube.resol.y; ++col) {
             for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
-                fread(cube.buff[row][col][lyr], sizeof(float), 3, file);
+                fread(cube.buff[row][col][lyr], sizeof(float), VChannels, file);
             }
         }
     }
@@ -140,7 +140,7 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
         buff[row] = malloc(sizeof(Colour[cols]));
         for (unsigned col = 0; col < cols; ++col) {
             buff[row][col] = malloc(Colour_size);
-            for (char ch = 0; ch < 3; ++ch) {
+            for (char ch = 0; ch < VChannels; ++ch) {
                 buff[row][col][ch] = 0;
             }
         }
@@ -304,7 +304,7 @@ void shoot_ray(Colour restrict result,
             unsigned lyr = roundcoord(cube.resol.z, difference[2]);
 
             // get the colour of this voxel and update result:
-            for (char ch = 0; ch < 3; ++ch) {
+            for (char ch = 0; ch < VChannels; ++ch) {
                 result[ch] += cube.buff[row][col][lyr][ch] * dt * transmission;
             }
 

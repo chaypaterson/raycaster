@@ -36,7 +36,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define Colour_size sizeof(float[3])
+#define VChannels 3 // number of colour channels for voxels
+#define Colour_size sizeof(float[VChannels])
 typedef float *Colour; // A Colour is an array of 3 floats: one per RGB channel.
                        // Because we need this to live on the heap, it has
                        // pointer type.
