@@ -18,6 +18,7 @@ seem to happen.
 
 The renderer can read voxels from files. A voxel cube file has the following
 format:
+
     * File signature (6 bytes): "Voxel\n"
     * Header (3 unsigned ints): resolution: rows, columns, and layers.
     * The rest (3 * rows * columns * layers * sizeof(float)): voxel colour data.
