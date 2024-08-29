@@ -100,8 +100,8 @@ struct VoxelCube load_cube(char *filename) {
     // TODO 6 is a magic number here
     const char signature[6] = "Voxel\n";
 
-    char header[6];
-    fread(header, sizeof(char), 6, file);
+    char header[sizeof(signature)];
+    fread(header, sizeof(char), sizeof(signature), file);
     // check these two are equal:
     if (!strcmp(signature, header)) {
         printf("Wrong input file type for voxel cube\n");
@@ -128,8 +128,6 @@ struct VoxelCube load_cube(char *filename) {
     return cube;
 }
 
-
-
 struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
     // Return an image plane with the specified resolution in a default location
     // and orientation in the scene.
@@ -152,9 +150,9 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
 
         // Default scene geometry:
 
-        .geom.dims = {3, 3},
+        .geom.dims = {2, 2},
         .geom.centre = {0, 0, 0},
-        .geom.tangent = {{0, 0, 0}, {0, 0, 0}},
+        .geom.tangent = {{0, 1, 0}, {0, 0, 1}},
         .geom.eye = {3, 0, 0},
 
         .buff = buff

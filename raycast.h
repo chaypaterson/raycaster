@@ -40,7 +40,7 @@
 #define Colour_size sizeof(float[VChannels])
 typedef float *Colour; // A Colour is an array of 3 floats: one per RGB channel.
                        // Because we need this to live on the heap, it has
-                       // pointer type.
+                       // pointer type instead of array type.
 
 typedef double Vector[3]; // A point in space or a direction.
 

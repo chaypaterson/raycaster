@@ -43,50 +43,44 @@ void gradient_test() {
 
 void draw_frame(struct VoxelCube cube) {
     // Draw a white cage:
+    float White[VChannels] = {100, 100, 100};
+    // TODO clear room for improvement here:
     for (unsigned row = 0; row < cube.resol.x; ++row) {
-        for (unsigned col = 0; col < cube.resol.y; col += cube.resol.y-1) {
-            for (unsigned lyr = 0; lyr < cube.resol.z; lyr += cube.resol.z-1) {
-                for (char ch = 0; ch < VChannels; ++ch) {
-                    cube.buff[row][col][lyr][ch] = 100;
-                }
-            }
+        for (unsigned edge = 0; edge < 4; ++edge) {
+            unsigned col = (edge % 2) * (cube.resol.y - 1);
+            unsigned lyr = ((edge / 2) % 2) * (cube.resol.z - 1);
+            memcpy(cube.buff[row][col][lyr], White, Colour_size);
         }
     }
     for (unsigned col = 0; col < cube.resol.y; ++col) {
-        for (unsigned row = 0; row < cube.resol.x; row += cube.resol.x-1) {
-            for (unsigned lyr = 0; lyr < cube.resol.z; lyr += cube.resol.z-1) {
-                for (char ch = 0; ch < VChannels; ++ch) {
-                    cube.buff[row][col][lyr][ch] = 100;
-                }
-            }
+        for (unsigned edge = 0; edge < 4; ++edge) {
+            unsigned row = (edge % 2) * (cube.resol.x - 1);
+            unsigned lyr = ((edge / 2) % 2) * (cube.resol.z - 1);
+            memcpy(cube.buff[row][col][lyr], White, Colour_size);
         }
     }
     for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
-        for (unsigned col = 0; col < cube.resol.y; col += cube.resol.y-1) {
-            for (unsigned row = 0; row < cube.resol.x; row += cube.resol.x-1) {
-                for (char ch = 0; ch < VChannels; ++ch) {
-                    cube.buff[row][col][lyr][ch] = 100;
-                }
-            }
+        for (unsigned edge = 0; edge < 4; ++edge) {
+            unsigned col = (edge % 2) * (cube.resol.y - 1);
+            unsigned row = ((edge / 2) % 2) * (cube.resol.x - 1);
+            memcpy(cube.buff[row][col][lyr], White, Colour_size);
         }
     }
 }
 
 void draw_axes(struct VoxelCube cube) {
+    float White[VChannels] = {100, 100, 100};
     for (unsigned row = 0; row < cube.resol.x; ++row) {
-        for (char ch = 0; ch < VChannels; ++ch) {
-            cube.buff[row][0][0][ch] = 100;
-        }
+        unsigned col = 0, lyr = 0;
+        memcpy(cube.buff[row][col][lyr], White, Colour_size);
     }
     for (unsigned col = 0; col < cube.resol.y; ++col) {
-        for (char ch = 0; ch < VChannels; ++ch) {
-            cube.buff[0][col][0][ch] = 100;
-        }
+        unsigned lyr = 0, row = 0;
+        memcpy(cube.buff[row][col][lyr], White, Colour_size);
     }
     for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
-        for (char ch = 0; ch < VChannels; ++ch) {
-            cube.buff[0][0][lyr][ch] = 100;
-        }
+        unsigned col = 0, row = 0;
+        memcpy(cube.buff[row][col][lyr], White, Colour_size);
     }
 }
 
@@ -96,7 +90,7 @@ void draw_rgb(struct VoxelCube cube) {
         for (unsigned col = 0; col < cube.resol.y; ++col) {
             for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
                 // Make an RGB cube:
-                float voxel[3] = {row * 1.0f / cube.resol.x,
+                float voxel[VChannels] = {row * 1.0f / cube.resol.x,
                                   col * 1.0f / cube.resol.y,
                                   lyr * 1.0f / cube.resol.z};
 
@@ -113,7 +107,7 @@ int main(int argc, char* argv[]) {
 
     // Fill a default cube with stuff:
     draw_rgb(cube);
-    //draw_frame(cube);
+    draw_frame(cube);
     draw_axes(cube);
 
     // Try saving and loading cube:
@@ -128,8 +122,6 @@ int main(int argc, char* argv[]) {
 
     // construct imaging plane:
     struct ImagePlane plane = new_image_plane(640, 640);
-    plane.geom.dims[0] = 2;
-    plane.geom.dims[1] = 2;
     printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
 
     // Set scene geometry:
