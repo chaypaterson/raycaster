@@ -132,11 +132,11 @@ int main(int argc, char* argv[]) {
     // e.g.
     //      ./renderer --load [file.cube]
     const char* loadme = "--load";
-    for (char* arg = *argv; arg < *argv + argc - 1; ++arg) {
-        if (!strcmp(loadme, arg)) {
+    for (char* *arg = argv; arg < argv + argc; ++arg) {
+        if (!strcmp(loadme, *arg)) {
             // Set the cube getter and filename:
             cube_get = load_cube;
-            filename = ++arg;
+            filename = *++arg;
             printf("Loading %s...\n", filename);
         }
     }
