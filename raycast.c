@@ -286,7 +286,8 @@ void shoot_ray(Colour restrict result,
         }
 
         if (is_inside_box(ray, cube)) {
-            // get the coords of the nearest voxel:
+            // convert a position in space into the coords of the nearest
+            // voxel:
 
             Vector difference;
             for (char axis = 0; axis < 3; ++axis) {

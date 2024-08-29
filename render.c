@@ -100,8 +100,8 @@ void draw_rgb(struct VoxelCube cube) {
     }
 }
 
-int main(int argc, char* argv[]) {
-    // TODO choose to load cube from file/save depending on argv
+struct VoxelCube rgb_test(char* filename) {
+    // Default unit test: create a pretty RGB cube 
     // Construct voxel cube:
     struct VoxelCube cube = new_unit_cube(64, 64, 64);
 
@@ -112,14 +112,42 @@ int main(int argc, char* argv[]) {
 
     // Try saving and loading cube:
     printf("Saving cube...\n");
-    save_cube(cube, "rgb.cube");
+    save_cube(cube, filename);
     free_unit_cube(cube); // flush the cube buffer
     printf("Loading cube...\n");
-    cube = load_cube("rgb.cube"); // reload
+    cube = load_cube(filename); // reload
+
+    return cube;
+}
+
+int main(int argc, char* argv[]) {
+    // TODO choose to load cube from file/save depending on argv
+
+    // Step 1: get a cube
+    struct VoxelCube (*cube_get)(char* filename);
+    // Default behaviour: draw an RGB cube
+    cube_get = rgb_test;
+    char* filename = "rgb.cube";
+    // Optional argv behaviour: load a cube from a file. 
+    // e.g.
+    //      ./renderer --load [file.cube]
+    const char* loadme = "--load";
+    for (char* arg = *argv; arg < *argv + argc - 1; ++arg) {
+        if (!strcmp(loadme, arg)) {
+            // Set the cube getter and filename:
+            cube_get = load_cube;
+            filename = ++arg;
+            printf("Loading %s...\n", filename);
+        }
+    }
+
+    // Get the cube:
+    struct VoxelCube cube = cube_get(filename);
 
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
 
+    // Step 2: draw the cube and make a video
     // construct imaging plane:
     struct ImagePlane plane = new_image_plane(640, 640);
     printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
