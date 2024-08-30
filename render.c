@@ -83,6 +83,8 @@ void draw_axes(struct VoxelCube cube) {
         memcpy(cube.buff[row][col][lyr], White, Colour_size);
     }
 }
+// TODO a voxel-free "draw axes" method? just project axes onto the plane? and
+// give them colours?
 
 void draw_rgb(struct VoxelCube cube) {
     // Draw an RGB cube in the voxel buffer:
