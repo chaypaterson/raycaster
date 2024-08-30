@@ -111,6 +111,7 @@ struct VoxelCube load_cube(char *filename) {
 
     unsigned resol[3]; // 3D resolution of cube
     fread(resol, sizeof(unsigned), 3, file);
+    printf("Resolution: %dx%dx%d\n", resol[0], resol[1], resol[2]);
 
     struct VoxelCube cube = new_unit_cube(resol[0], resol[1], resol[2]);
 
