@@ -32,7 +32,9 @@ The renderer can read voxels from files by invoking `./renderer --load
 * The rest of the file (3 * rows * columns * layers * sizeof(float)): voxel colour data.
 
 Currently voxel colour data is 3 channel floating point. This might change in
-the future (alpha channels/opacity maybe) but is not a priority.
+the future (alpha channels/opacity maybe) but is not a priority. Conventionally,
+I put the file extension as `.cube` but this is arbitrary as long as the format
+is as described above.
 
 Once you have written your 3D colour data to a file, you can load that colour
 data into the cube and render it by invoking `./renderer --load [yourfile.cube]`.
