@@ -22,10 +22,10 @@ Note: compiling raycast.c with optimisation levels higher than -O1 under clang
 results in unexpected behaviour and is not recommended. With GCC this doesn't
 seem to happen, and -O3 is perfectly fine.
 
-# Serialisation
+## Serialisation
 
-The renderer can read voxels from files. A voxel cube file has the following
-format:
+The renderer can read voxels from files by invoking `./renderer --load
+[yourfile.cube]`. A voxel cube file has the following format:
 
 * File signature (first 6 bytes): "Voxel\n"
 * Header (3 unsigned ints): resolution: rows, columns, and layers.
