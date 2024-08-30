@@ -104,8 +104,15 @@ struct VoxelCube load_cube(char *filename);
 // Construct and return a new image plane with the specified resolution:
 struct ImagePlane new_image_plane(unsigned rows, unsigned cols);
 
+// Wipe the image plane, filling it with black pixels:
+void wipe_plane(struct ImagePlane plane);
+
 // Free the memory in the image buffer of the image plane:
 void free_image_plane(struct ImagePlane plane);
+
+// Quantise and write the image plane colour buffer to a file:
+void save_image_plane(char* frameppm, struct ImagePlane plane, 
+                      float exposure, float gamma);
 
 // Reorient the image plane to view the reference cube from a given location in
 // polar coordinates:

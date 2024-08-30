@@ -160,34 +160,23 @@ int main(int argc, char* argv[]) {
     int maxframes = 150;
 
     for (int frame = 0; frame < maxframes; ++frame) {
+        // Place the camera in the scene:
         orient_image_plane(&plane, cube, 2.0, theta, phi);
 
-        // render scene:
+        // render scene (take a picture):
         raycast(plane, cube);
 
-        // quantise colours and write out plane image buffer:
+        // Choose a filename for this image:
         char frameppm[sizeof("frame000.ppm")];
         sprintf(frameppm, "frame%03d.ppm", frame);
 
-        FILE* img = fopen(frameppm, "w");
+        // quantise colours and write out plane image buffer to file:
+        save_image_plane(frameppm, plane, 1.0, 0.75);
 
-        putheader(img, plane.resol.cols, plane.resol.rows);
+        // clean the image plane so it is ready for the next frame:
+        wipe_plane(plane);
 
-        for (unsigned row = 0; row < plane.resol.rows; ++row) {
-            for (unsigned col = 0; col < plane.resol.cols; ++col) {
-                Pixel colour;
-                for (char ch = 0; ch < VChannels; ++ch) {
-                    // Quantise with a saturation value and gamma correction:
-                    colour[ch] = quantise(plane.buff[row][col][ch], 1.0, 0.75);
-                    // wipe the image plane buffer:
-                    plane.buff[row][col][ch] = 0.0f;
-                }
-                putpixel(img, colour);
-            }
-        }
-
-        fclose(img);
-
+        // Move the camera around in an interesting way:
         phi += 2.0 * M_PI / maxframes;
         theta += 0.25 * sin(frame * M_PI * 2.0 / maxframes) * 2.0 * M_PI/ maxframes;
     }

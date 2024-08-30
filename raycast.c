@@ -134,13 +134,12 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
     Colour **buff = malloc(sizeof(Colour[rows][cols]));
 
     // zero initialise image buffer:
+    float Black[VChannels] = {0, 0, 0};
     for (unsigned row = 0; row < rows; ++row) {
         buff[row] = malloc(sizeof(Colour[cols]));
         for (unsigned col = 0; col < cols; ++col) {
             buff[row][col] = malloc(Colour_size);
-            for (char ch = 0; ch < VChannels; ++ch) {
-                buff[row][col][ch] = 0;
-            }
+            memcpy(buff[row][col], Black, Colour_size);
         }
     }
 
@@ -159,6 +158,39 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
     };
 
     return image_plane;
+}
+
+#include "pixel.h"
+void save_image_plane(char* frameppm, struct ImagePlane plane, 
+                      float exposure, float gamma) {
+    // Write the image plane to a file, setting overall brightness (exposure)
+    // and correcting for gamma.
+    FILE* img = fopen(frameppm, "w");
+
+    putheader(img, plane.resol.cols, plane.resol.rows);
+
+    for (unsigned row = 0; row < plane.resol.rows; ++row) {
+        for (unsigned col = 0; col < plane.resol.cols; ++col) {
+            Pixel colour;
+            for (char ch = 0; ch < VChannels; ++ch) {
+                // Quantise with a saturation value and gamma correction:
+                colour[ch] = quantise(plane.buff[row][col][ch], exposure, gamma);
+            }
+            putpixel(img, colour);
+        }
+    }
+
+    fclose(img);
+}
+
+void wipe_plane(struct ImagePlane plane) {
+    // wipe image buffer, filling it with empty pixels:
+    float Black[VChannels] = {0, 0, 0};
+    for (unsigned row = 0; row < plane.resol.rows; ++row) {
+        for (unsigned col = 0; col < plane.resol.cols; ++col) {
+            memcpy(plane.buff[row][col], Black, Colour_size);
+        }
+    }
 }
 
 void free_image_plane(struct ImagePlane plane) {
