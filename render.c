@@ -158,6 +158,9 @@ int main(int argc, char* argv[]) {
     double theta = -M_PI * 0.25;
     double phi = 0.0f;
 
+    float exposure = 1.0f; // lower is brighter
+    float gamma = 0.25; // lower is more compressed
+
     // Create video with multiple views of the same cube:
     int maxframes = 150;
 
@@ -173,7 +176,7 @@ int main(int argc, char* argv[]) {
         sprintf(frameppm, "frame%03d.ppm", frame);
 
         // quantise colours and write out plane image buffer to file:
-        save_image_plane(frameppm, plane, 1.0, 0.75);
+        save_image_plane(frameppm, plane, exposure, gamma);
 
         // clean the image plane so it is ready for the next frame:
         wipe_plane(plane);

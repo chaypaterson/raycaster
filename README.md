@@ -4,6 +4,8 @@ raycaster
 This program is a simple test program that will eventually be used to make
 animations using volumetric raycasting to visualise scientific data.
 
+## Building
+
 It compiles with
 
     cc pixel.c -c -o pixel.a
@@ -38,3 +40,12 @@ is as described above.
 
 Once you have written your 3D colour data to a file, you can load that colour
 data into the cube and render it by invoking `./renderer --load [yourfile.cube]`.
+
+## Running
+
+Run either `./renderer` for a demo mode, which will save an example voxel file
+to disk, or `./renderer --load [yourfile.cube]` to load and make a video of that
+file's contents.
+
+NaN values will be rendered as black voxels or voxels with unexpected colours.
+To keep this library simple, input is assumed to be nice and not contain NaNs.
