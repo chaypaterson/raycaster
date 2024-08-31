@@ -406,17 +406,11 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
         normal[axis] *= -1.0 / dist;
     }
 
-    // coefficient for stochastic ray tracing
-    double epsilon = image_plane.geom.dims[0] / (image_plane.resol.rows);
-    srand(0);
-
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
             // set scene coordinates of this pixel in the image plane
             Vector ray;
             start_position(ray, image_plane, row, col);
-            // randomise start position slightly for antialiasing:
-            randomise(ray, epsilon);
             
             // ray is now at the pixel coordinates in the scene. Cast this ray
             // in the direction "normal" (to the plane -- towards the cube)

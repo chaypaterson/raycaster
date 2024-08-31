@@ -68,6 +68,14 @@ void draw_frame(struct VoxelCube cube) {
     }
 }
 
+double dot(Vector a, Vector b) {
+    double product = 0;
+    for (int i = 0; i < 3; ++i) product += a[i] * b[i];
+    return product;
+}
+
+// TODO a voxel-free "draw axes" method? just project axes onto the plane? and
+// give them colours?
 void draw_axes(struct VoxelCube cube) {
     float White[VChannels] = {100, 100, 100};
     for (unsigned row = 0; row < cube.resol.x; ++row) {
@@ -83,8 +91,6 @@ void draw_axes(struct VoxelCube cube) {
         memcpy(cube.buff[row][col][lyr], White, Colour_size);
     }
 }
-// TODO a voxel-free "draw axes" method? just project axes onto the plane? and
-// give them colours?
 
 void draw_rgb(struct VoxelCube cube) {
     // Draw an RGB cube in the voxel buffer:
