@@ -407,24 +407,21 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     }
 
     // coefficient for stochastic ray tracing
-    double epsilon = 2.0f / (image_plane.resol.rows);
-    //srand(0);
+    double epsilon = image_plane.geom.dims[0] / (image_plane.resol.rows);
+    srand(0);
 
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
             // set scene coordinates of this pixel in the image plane
             Vector ray;
             start_position(ray, image_plane, row, col);
+            // randomise start position slightly for antialiasing:
+            randomise(ray, epsilon);
             
             // ray is now at the pixel coordinates in the scene. Cast this ray
-            // in the direction from the eye to the pixel.
+            // in the direction "normal" (to the plane -- towards the cube)
             Vector dirn;
-            //get_eye_direction(dirn, image_plane, ray);
-
-            // Previous version: direction "normal" (to the plane -- towards the cube)
             for (char axis = 0; axis < 3; ++axis) dirn[axis] = normal[axis];
-            // Try adding tiny random offsets to the direction to antialias:
-            //randomise(dirn, epsilon);
 
             Colour pixel = image_plane.buff[row][col];
 

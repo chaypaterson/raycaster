@@ -159,7 +159,7 @@ int main(int argc, char* argv[]) {
     double phi = 0.0f;
 
     float exposure = 1.0f; // lower is brighter
-    float gamma = 0.25; // lower is more compressed
+    float gamma = 0.95; // lower is more compressed
 
     // Create video with multiple views of the same cube:
     int maxframes = 150;
