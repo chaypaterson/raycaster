@@ -284,6 +284,14 @@ unsigned roundcoord(unsigned side_resolution, double difference) {
     return rounded;
 }
 
+// some vector geometry routines to raycast.c
+
+double dot(Vector a, Vector b) {
+    double product = 0;
+    for (char i = 0; i < 3; ++i) product += a[i] * b[i];
+    return product;
+}
+
 void randomise(Vector dirn, double epsilon) {
     // add tiny random offsets to the direction as an antialiasing measure
     for (char axis = 0; axis < 3; ++axis) {
@@ -345,6 +353,7 @@ void shoot_ray(Colour restrict result,
 
             /* TODO voxels could have alpha channels instead? */
             transmission *= cube.geom.extinction;
+
         }
     }
 }

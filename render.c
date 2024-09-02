@@ -41,19 +41,6 @@ void gradient_test() {
     fclose(img);
 }
 
-double dot(Vector a, Vector b) {
-    double product = 0;
-    for (int i = 0; i < 3; ++i) product += a[i] * b[i];
-    return product;
-}
-
-// TODO a voxel-free "draw axes" method? just project axes onto the plane? and
-// give them colours?
-void draw_axes(struct ImagePlane plane) {
-    // draw an x axis, y axis, and z axis in colours at the origin
-    // each axis should be 1 unit long
-}
-
 void draw_rgb(struct VoxelCube cube) {
     // Draw an RGB cube in the voxel buffer:
     for (unsigned row = 0; row < cube.resol.x; ++row) {
@@ -67,6 +54,19 @@ void draw_rgb(struct VoxelCube cube) {
                 memcpy(cube.buff[row][col][lyr], voxel, Colour_size);
             }
         }
+    }
+}
+
+void draw_rgb_axes(struct VoxelCube cube) {
+    // Identify the row, col, and lyr axes in red, green, and blue
+    for (unsigned row = 0; row < cube.resol.x; ++row) {
+        cube.buff[row][0][0][0] = 20.0f;
+    }
+    for (unsigned col = 0; col < cube.resol.y; ++col) {
+        cube.buff[0][col][0][1] = 20.0f;
+    }
+    for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+        cube.buff[0][0][lyr][2] = 20.0f;
     }
 }
 
@@ -110,6 +110,10 @@ int main(int argc, char* argv[]) {
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
 
+    // TESTING: add an axes cube
+    struct VoxelCube axes = new_unit_cube(64, 64, 64);
+    draw_rgb_axes(axes);
+
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
 
@@ -133,7 +137,7 @@ int main(int argc, char* argv[]) {
         orient_image_plane(&plane, cube, 2.0, theta, phi);
 
         // render scene (take a picture):
-        // draw_axes(plane);
+        raycast(plane, axes);
         raycast(plane, cube);
 
         // Choose a filename for this image:
@@ -153,6 +157,8 @@ int main(int argc, char* argv[]) {
 
     free_unit_cube(cube);
     free_image_plane(plane);
+
+    printf("\nDone\n");
 
     return 0;
 }
