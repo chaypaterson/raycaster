@@ -58,6 +58,7 @@ void draw_rgb(struct VoxelCube cube) {
 }
 
 void draw_rgb_axes(struct VoxelCube cube) {
+    // paint axes onto a cube
     // Identify the row, col, and lyr axes in red, green, and blue
     for (unsigned row = 0; row < cube.resol.x; ++row) {
         cube.buff[row][0][0][0] = 20.0f;
@@ -110,7 +111,7 @@ int main(int argc, char* argv[]) {
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
 
-    // TESTING: add an axes cube
+    // TESTING: add an axes cube TODO this is expensive, just paint on one cube
     struct VoxelCube axes = new_unit_cube(64, 64, 64);
     draw_rgb_axes(axes);
 

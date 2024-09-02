@@ -292,11 +292,15 @@ double dot(Vector a, Vector b) {
     return product;
 }
 
+double randdbl(double epsilon) {
+    // return a random variate with zero mean and variance epsilon^2 / 4:
+    return epsilon * rand() / RAND_MAX - epsilon * 0.5;
+}
+
 void randomise(Vector dirn, double epsilon) {
     // add tiny random offsets to the direction as an antialiasing measure
     for (char axis = 0; axis < 3; ++axis) {
-        dirn[axis] += epsilon * rand() / RAND_MAX;
-        dirn[axis] -= epsilon * 0.5; // epsilon should have zero mean
+        dirn[axis] += randdbl(epsilon);
     }
 }
 
@@ -320,8 +324,11 @@ void shoot_ray(Colour restrict result,
     }
 
     Vector ray; // shoot this ray
+    double tstart = 0;
+    // antialiasing: randomise the ray start position a little bit:
+    //tstart = randdbl(dt); // averages to zero
 
-    for (double t = 0; t < tmax; t += dt) {
+    for (double t = tstart; t < tmax; t += dt) {
         // compute position of tip of the ray:
         // ray = start + t * dir
         for (char axis = 0; axis < 3; ++axis) {
