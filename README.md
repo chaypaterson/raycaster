@@ -10,7 +10,7 @@ It compiles with
 
     cc pixel.c -c -o pixel.a
     cc raycast.c -c -o raycast.a
-    cc pixel.a raycast.a render.c -o renderer
+    cc pixel.a raycast.a render.c -o renderer -lm
 
 Running `./renderer` with no arguments then produces a series of PPM images in
 binary format. This stack of PPM images can then be converted to a video with
