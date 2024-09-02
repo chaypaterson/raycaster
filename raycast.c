@@ -153,7 +153,8 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
         .geom.dims = {2, 2},
         .geom.centre = {0, 0, 0},
         .geom.tangent = {{0, 1, 0}, {0, 0, 1}},
-        .geom.eye = {3, 0, 0},
+        .geom.normal = {1, 0, 0},
+        .geom.eye = {1, 0, 0},
 
         .buff = buff
     };
@@ -201,7 +202,6 @@ void free_image_plane(struct ImagePlane plane) {
         }
         free(plane.buff[row]);
     }
-
     free(plane.buff);
 }
 
@@ -211,25 +211,29 @@ void free_image_plane(struct ImagePlane plane) {
 void orient_image_plane(struct ImagePlane *image_plane,
                         struct VoxelCube ref_cube,
                         double range, double theta, double phi) {
-    // Move the image plane so it is at a distance range from the centre of the reference
-    // cube, and oriented so that the vector connecting the cube's centre with
-    // the plane's centre is normal to the plane.
+    // Move the image plane so it is at a distance range from the centre of the 
+    // reference cube, and oriented so that the vector connecting the cube's
+    // centre with the plane's centre is normal to the plane.
 
-    // compute centre:
-    Vector deltar = {range * sin(theta) * cos(phi),
-                     range * sin(theta) * sin(phi),
-                     range * cos(theta)};
+    // compute new normal:
+    Vector normal = {sin(theta) * cos(phi),
+                     sin(theta) * sin(phi),
+                     cos(theta)};
 
-    // Move image plane to new location:
     for (char axis = 0; axis < 3; ++axis) {
-        image_plane->geom.centre[axis] = ref_cube.geom.centre[axis];
-        image_plane->geom.centre[axis] += deltar[axis];
+        image_plane->geom.normal[axis] = normal[axis];
     }
 
-    // Place eye at 4 * range:
+    // Move centre of image plane to new location:
     for (char axis = 0; axis < 3; ++axis) {
-        image_plane->geom.eye[axis] = ref_cube.geom.centre[axis];
-        image_plane->geom.eye[axis] += 4 * deltar[axis];
+        image_plane->geom.centre[axis] = ref_cube.geom.centre[axis];
+        image_plane->geom.centre[axis] += range * normal[axis];
+    }
+
+    // Place eye at double the range from the cube centre:
+    for (char axis = 0; axis < 3; ++axis) {
+        image_plane->geom.eye[axis] = image_plane->geom.centre[axis];
+        image_plane->geom.eye[axis] += range * normal[axis];
     }
 
     // compute tangent vectors:
@@ -246,7 +250,6 @@ void orient_image_plane(struct ImagePlane *image_plane,
     image_plane->geom.tangent[1][0] = -sin(phi);
     image_plane->geom.tangent[1][1] = +cos(phi);
     image_plane->geom.tangent[1][2] = 0;
-
 }
 
 char is_inside_box(Vector point, struct VoxelCube box) {
@@ -389,22 +392,16 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     // guess a tmax: twice the distance from the centre of the cube to the
     // centre of the plane.
     // At the same time, compute and store a unit normal for the plane
-    Vector normal;
     double dist;
 
     for (char axis = 0; axis < 3; ++axis) {
-        normal[axis] = image_plane.geom.centre[axis] - cube.geom.centre[axis];
-        dist += normal[axis] * normal[axis];
+        double dx = image_plane.geom.centre[axis] - cube.geom.centre[axis];
+        dist += dx * dx;
     }
 
     dist = sqrt(dist);
     double tmax = 2 * dist;
     //printf("d = %g (should be 2.0)\n", dist); // TODO DEBUG
-
-    // We will also want to use the normal later:
-    for (char axis = 0; axis < 3; ++axis) {
-        normal[axis] *= -1.0 / dist;
-    }
 
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
@@ -415,7 +412,8 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
             // ray is now at the pixel coordinates in the scene. Cast this ray
             // in the direction "normal" (to the plane -- towards the cube)
             Vector dirn;
-            for (char axis = 0; axis < 3; ++axis) dirn[axis] = normal[axis];
+            for (char axis = 0; axis < 3; ++axis) 
+                dirn[axis] = -image_plane.geom.normal[axis];
 
             Colour pixel = image_plane.buff[row][col];
 

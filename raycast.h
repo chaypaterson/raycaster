@@ -55,6 +55,7 @@ struct ImagePlane {
         double dims[2]; // Dimensions of the plane
         Vector centre;
         Vector tangent[2]; // Two tangent vectors. See note below about buffer.
+        Vector normal; // The vector normal to the plane
         Vector eye; // The eye from which rays are cast (optional)
     } geom;
 

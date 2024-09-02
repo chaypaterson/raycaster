@@ -9,3 +9,4 @@ example-images
 *.webm
 nohup.out
 *.cube
+video/
