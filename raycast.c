@@ -132,10 +132,10 @@ struct VoxelCube load_cube(char *filename) {
 struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
     // Return an image plane with the specified resolution in a default location
     // and orientation in the scene.
-    Colour **buff = malloc(sizeof(Colour[rows][cols]));
 
     // zero initialise image buffer:
     float Black[VChannels] = {0, 0, 0};
+    Colour **buff = malloc(sizeof(Colour[rows][cols]));
     for (unsigned row = 0; row < rows; ++row) {
         buff[row] = malloc(sizeof(Colour[cols]));
         for (unsigned col = 0; col < cols; ++col) {
@@ -252,11 +252,9 @@ void orient_image_plane(struct ImagePlane *image_plane,
     image_plane->geom.tangent[1][2] = 0;
 }
 
-char is_inside_box(Vector point, struct VoxelCube box) {
+_Bool is_inside_box(Vector point, struct VoxelCube box) {
     // check if point is inside box
-    char test = 1; // Really this should be a bool: there is no advantage in
-                   // declaring this as a bool, but it is a helpful hint to
-                   // future engineers.
+    _Bool test = 1;
 
     for (char axis = 0; axis < 3; ++axis) {
         double diff = point[axis] - box.geom.centre[axis];
@@ -417,7 +415,6 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
 
     dist = sqrt(dist);
     double tmax = 2 * dist;
-    //printf("d = %g (should be 2.0)\n", dist); // TODO DEBUG
 
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {

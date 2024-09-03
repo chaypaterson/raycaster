@@ -126,7 +126,7 @@ void orient_image_plane(struct ImagePlane* image_plane,
                         double range, double theta, double phi);
 
 // test if a point is inside a box:
-char is_inside_box(Vector point, struct VoxelCube box);
+_Bool is_inside_box(Vector point, struct VoxelCube box);
 
 // shoot a ray along a vector and accumulate the colours of voxels inside a
 // result:
