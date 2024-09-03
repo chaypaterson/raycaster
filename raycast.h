@@ -102,6 +102,9 @@ void free_unit_cube(struct VoxelCube unitcube);
 void save_cube(struct VoxelCube cube, char *filename);
 struct VoxelCube load_cube(char *filename);
 
+// Check the biggest channel value in the cube:
+float maximum_colour_value(struct VoxelCube cube);
+
 // Construct and return a new image plane with the specified resolution:
 struct ImagePlane new_image_plane(unsigned rows, unsigned cols);
 

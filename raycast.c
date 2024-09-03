@@ -129,6 +129,26 @@ struct VoxelCube load_cube(char *filename) {
     return cube;
 }
 
+float maximum_colour_value(struct VoxelCube cube) {
+    // check the largest colour value
+    // check maximum value
+    float maxval = 0;
+
+    for (unsigned row = 0; row < cube.resol.x; ++row) {
+        for (unsigned col = 0; col < cube.resol.y; ++col) {
+            for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
+                for (unsigned ch = 0; ch < VChannels; ++ch) {
+                    if (cube.buff[row][col][lyr][ch] > maxval) {
+                        maxval = cube.buff[row][col][lyr][ch];
+                    }
+                }
+            }
+        }
+    }
+
+    return maxval;
+}
+
 struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
     // Return an image plane with the specified resolution in a default location
     // and orientation in the scene.
