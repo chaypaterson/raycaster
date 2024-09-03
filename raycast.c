@@ -418,7 +418,6 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     dist = sqrt(dist);
     double tmax = 2 * dist;
     //printf("d = %g (should be 2.0)\n", dist); // TODO DEBUG
-    srand(0); // seed RNG for antialiasing
 
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {

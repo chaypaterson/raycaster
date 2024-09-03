@@ -112,6 +112,8 @@ int main(int argc, char* argv[]) {
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
 
+    srand(0); // seed RNG for antialiasing
+
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
 
