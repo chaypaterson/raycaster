@@ -1,5 +1,6 @@
 renderer
 example-images
+gradient
 *.swp
 *.ppm
 *.png

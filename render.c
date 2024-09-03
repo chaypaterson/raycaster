@@ -6,41 +6,6 @@
 #include "pixel.h"
 #include "raycast.h"
 
-void gradient_test() {
-    // Write out a test image:
-    const char* imagefile = "testimg.ppm";
-    Pixel BLACK = {0, 0, 0};
-    // NB: COLOUR_MAX, 255, and 0xFF are synonymous on most systems.
-    Pixel MAGENTA = {COLOUR_MAX, 0x00, COLOUR_MAX};
-    Pixel CYAN = {0x00, COLOUR_MAX, COLOUR_MAX};
-    Pixel RED = {COLOUR_MAX, 0x00, 0x00};
-
-    int cols = 640;
-    int rows = 320;
-
-    // Open a file and write an image to it:
-
-    FILE* img = fopen(imagefile, "w");
-
-    putheader(img, cols, rows);
-
-    // Draw the image:
-    for (int row = 0; row < rows; ++row) {
-        for (int col = 0; col < cols; ++col) {
-            Pixel colour;
-            memcpy(colour, MAGENTA, sizeof(colour));
-
-            // Choose a colour:
-            double f = col * 1.0/cols;
-            mixcolours_y_corr(colour, f, CYAN);
-
-            putpixel(img, colour);
-        }
-    }
-
-    fclose(img);
-}
-
 void draw_rgb(struct VoxelCube cube) {
     // Draw an RGB cube in the voxel buffer:
     for (unsigned row = 0; row < cube.resol.x; ++row) {
@@ -93,9 +58,11 @@ struct VoxelCube rgb_test(char* filename) {
 int main(int argc, char* argv[]) {
     // Step 1: get a cube
     struct VoxelCube (*cube_get)(char* filename);
+
     // Default behaviour: draw an RGB cube
     cube_get = rgb_test;
     char* filename = "rgb.cube";
+
     // Optional argv behaviour: load a cube from a file. 
     // e.g.
     //      ./renderer --load [file.cube]
