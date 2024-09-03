@@ -326,7 +326,7 @@ void shoot_ray(Colour restrict result,
     Vector ray; // shoot this ray
     double tstart = 0;
     // antialiasing: randomise the ray start position a little bit:
-    //tstart = randdbl(dt); // averages to zero
+    tstart = randdbl(dt); // averages to zero
 
     for (double t = tstart; t < tmax; t += dt) {
         // compute position of tip of the ray:
@@ -418,6 +418,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     dist = sqrt(dist);
     double tmax = 2 * dist;
     //printf("d = %g (should be 2.0)\n", dist); // TODO DEBUG
+    srand(0); // seed RNG for antialiasing
 
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {

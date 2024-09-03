@@ -78,6 +78,7 @@ struct VoxelCube rgb_test(char* filename) {
 
     // Fill a default cube with stuff:
     draw_rgb(cube);
+    draw_rgb_axes(cube);
 
     // Try saving and loading cube:
     printf("Saving cube...\n");
@@ -111,10 +112,6 @@ int main(int argc, char* argv[]) {
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
 
-    // TESTING: add an axes cube TODO this is expensive, just paint on one cube
-    struct VoxelCube axes = new_unit_cube(64, 64, 64);
-    draw_rgb_axes(axes);
-
     // unit test: check if the centre of the cube is inside the cube:
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
 
@@ -138,7 +135,6 @@ int main(int argc, char* argv[]) {
         orient_image_plane(&plane, cube, 2.0, theta, phi);
 
         // render scene (take a picture):
-        raycast(plane, axes);
         raycast(plane, cube);
 
         // Choose a filename for this image:
