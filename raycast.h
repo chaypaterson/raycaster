@@ -87,16 +87,16 @@ struct VoxelCube {
         double circumradius; // Half the diagonal length of the cube
     } geom;
 
-    Colour ***buff; // Buffer containing the contents of the voxel cloud
+    Colour ***block; // Buffer containing the contents of the voxel cloud
     // A voxel is a floating-point colour tuple.
     // The buffer should be accessed like:
-    //          this.buff[row][col][layer]
+    //          this.block[row][col][layer]
 };
 
 // Construct and return a new unit cube with the specified resolution:
 struct VoxelCube new_unit_cube(unsigned res_x, unsigned res_y, unsigned res_z);
 
-// Free the memory in the image buffer of the unit cube:
+// Free the memory in the voxel buffer of the unit cube:
 void free_unit_cube(struct VoxelCube unitcube);
 
 // Save and load cubes to and from files:

@@ -48,7 +48,7 @@ struct VoxelCube new_unit_cube(unsigned res_x, unsigned res_y, unsigned res_z) {
         .geom.circumradius = 0.866,
 
         // Allocate memory for voxel buffer
-        .buff = buff
+        .block = buff
     };
 
     return unitcube;
@@ -60,14 +60,14 @@ void free_unit_cube(struct VoxelCube unitcube) {
     for (unsigned ix = 0; ix < unitcube.resol.x; ++ix) {
         for (unsigned iy = 0; iy < unitcube.resol.y; ++iy) {
             for (unsigned iz = 0; iz < unitcube.resol.z; ++iz) {
-                free(unitcube.buff[ix][iy][iz]);
+                free(unitcube.block[ix][iy][iz]);
             }
-            free(unitcube.buff[ix][iy]);
+            free(unitcube.block[ix][iy]);
         }
-        free(unitcube.buff[ix]);
+        free(unitcube.block[ix]);
     }
 
-    free(unitcube.buff);
+    free(unitcube.block);
 }
 
 // file management: load and save voxel cube data
@@ -87,7 +87,7 @@ void save_cube(struct VoxelCube cube, char *filename) {
     for (unsigned row = 0; row < cube.resol.x; ++row) {
         for (unsigned col = 0; col < cube.resol.y; ++col) {
             for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
-                fwrite(cube.buff[row][col][lyr], sizeof(float), VChannels, file);
+                fwrite(cube.block[row][col][lyr], sizeof(float), VChannels, file);
             }
         }
     }
@@ -123,7 +123,7 @@ struct VoxelCube load_cube(char *filename) {
     for (unsigned row = 0; row < cube.resol.x; ++row) {
         for (unsigned col = 0; col < cube.resol.y; ++col) {
             for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
-                fread(cube.buff[row][col][lyr], sizeof(float), VChannels, file);
+                fread(cube.block[row][col][lyr], sizeof(float), VChannels, file);
             }
         }
     }
@@ -142,8 +142,8 @@ float maximum_colour_value(struct VoxelCube cube) {
         for (unsigned col = 0; col < cube.resol.y; ++col) {
             for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
                 for (unsigned ch = 0; ch < VChannels; ++ch) {
-                    if (cube.buff[row][col][lyr][ch] > maxval) {
-                        maxval = cube.buff[row][col][lyr][ch];
+                    if (cube.block[row][col][lyr][ch] > maxval) {
+                        maxval = cube.block[row][col][lyr][ch];
                     }
                 }
             }
@@ -393,7 +393,7 @@ void shoot_ray(Colour restrict result,
 
             // get the colour of this voxel and update result:
             for (char ch = 0; ch < VChannels; ++ch) {
-                result[ch] += cube.buff[row][col][lyr][ch] * dt * transmission;
+                result[ch] += cube.block[row][col][lyr][ch] * dt * transmission;
             }
 
             /* TODO voxels could have alpha channels instead? */

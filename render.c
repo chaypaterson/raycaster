@@ -16,7 +16,7 @@ void draw_rgb(struct VoxelCube cube) {
                                   col * 1.0f / cube.resol.y,
                                   lyr * 1.0f / cube.resol.z};
 
-                memcpy(cube.buff[row][col][lyr], voxel, Colour_size);
+                memcpy(cube.block[row][col][lyr], voxel, Colour_size);
             }
         }
     }
@@ -26,13 +26,13 @@ void draw_rgb_axes(struct VoxelCube cube) {
     // paint axes onto a cube
     // Identify the row, col, and lyr axes in red, green, and blue
     for (unsigned row = 0; row < cube.resol.x; ++row) {
-        cube.buff[row][0][0][0] = 20.0f;
+        cube.block[row][0][0][0] = 20.0f;
     }
     for (unsigned col = 0; col < cube.resol.y; ++col) {
-        cube.buff[0][col][0][1] = 20.0f;
+        cube.block[0][col][0][1] = 20.0f;
     }
     for (unsigned lyr = 0; lyr < cube.resol.z; ++lyr) {
-        cube.buff[0][0][lyr][2] = 20.0f;
+        cube.block[0][0][lyr][2] = 20.0f;
     }
 }
 
