@@ -44,6 +44,10 @@ struct VoxelCube new_unit_cube(unsigned res_x, unsigned res_y, unsigned res_z) {
         // Default: cube should be transparent
         .geom.extinction = 1.0,
 
+        // Initial value: TODO this is not portable for non-unit cubes
+        .geom.circumradius = 0.866,
+
+        // Allocate memory for voxel buffer
         .buff = buff
     };
 
@@ -323,8 +327,8 @@ void randomise(Vector dirn, double epsilon) {
 }
 
 void shoot_ray(Colour restrict result,
-               Vector start, Vector dir, struct VoxelCube cube, double tmax) {
-    // shoot a ray from start to start+tmax*dir
+               Vector start, Vector dir, struct VoxelCube cube) {
+    // shoot a ray from start to a reasonable end point
     // accumulate the colours in the cube's buffer
     // write out the total colour to the pointer "result"
     // The result colour should be nonaliasing: we do not refer to this pointer
@@ -341,12 +345,28 @@ void shoot_ray(Colour restrict result,
         corner[axis] = cube.geom.centre[axis] - 0.5 * cube.geom.dims[axis];
     }
 
-    Vector ray; // shoot this ray
-    double tstart = 0;
-    // antialiasing: randomise the ray start position a little bit:
-    tstart = randdbl(dt); // averages to zero
+    // Intelligently work out a good end point and skip useless iterations at
+    // the start. To do this, pre-compute intersections with a sphere that
+    // bounds the bounding cube (the circumsphere):
+    Vector difference; // between pixel and cube centres
+    for (char axis = 0; axis < 3; ++axis) {
+        difference[axis] = start[axis] - cube.geom.centre[axis];
+    }
+    double b = dot(dir, difference);
+    double c = dot(difference, difference);
+    c -= cube.geom.circumradius * cube.geom.circumradius;
 
-    for (double t = tstart; t < tmax; t += dt) {
+    if ((b > 0) || (b * b <= c)) return; // skip this pixel
+    // otherwise:
+    double twidth = sqrt(b * b - c);
+
+    Vector ray; // shoot this ray
+    double tstart = -b - twidth;
+    double tstop = -b + twidth;
+    // antialiasing: randomise the ray start position a little bit:
+    tstart += randdbl(dt); // averages to zero
+
+    for (double t = tstart; t < tstop; t += dt) {
         // compute position of tip of the ray:
         // ray = start + t * dir
         for (char axis = 0; axis < 3; ++axis) {
@@ -378,7 +398,6 @@ void shoot_ray(Colour restrict result,
 
             /* TODO voxels could have alpha channels instead? */
             transmission *= cube.geom.extinction;
-
         }
     }
 }
@@ -423,19 +442,6 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
     // Note: we shouldn't need to pass pointers to the objects in this function
     // because the buffers are already indirected.
 
-    // guess a tmax: twice the distance from the centre of the cube to the
-    // centre of the plane.
-    // At the same time, compute and store a unit normal for the plane
-    double dist;
-
-    for (char axis = 0; axis < 3; ++axis) {
-        double dx = image_plane.geom.centre[axis] - cube.geom.centre[axis];
-        dist += dx * dx;
-    }
-
-    dist = sqrt(dist);
-    double tmax = 2 * dist;
-
     for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
         for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
             // set scene coordinates of this pixel in the image plane
@@ -448,9 +454,11 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
             for (char axis = 0; axis < 3; ++axis) 
                 dirn[axis] = -image_plane.geom.normal[axis];
 
+            // Assign a pixel from the image buffer:
             Colour pixel = image_plane.buff[row][col];
 
-            shoot_ray(pixel, ray, dirn, cube, tmax);
+            // increment pixel value by the brightness along the ray:
+            shoot_ray(pixel, ray, dirn, cube);
         }
     }
 }

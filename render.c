@@ -78,6 +78,8 @@ int main(int argc, char* argv[]) {
 
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
+
+    // sanity check:
     printf("Max colour value: %f\n", maximum_colour_value(cube));
 
     srand(0); // seed RNG for antialiasing

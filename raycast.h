@@ -84,6 +84,7 @@ struct VoxelCube {
         double extinction; // Opacity of the cube. 1.0 = transparent,
         // 0.0=completely opaque. TODO really we should give individual voxels
         // an alpha channel.
+        double circumradius; // Half the diagonal length of the cube
     } geom;
 
     Colour ***buff; // Buffer containing the contents of the voxel cloud
@@ -135,7 +136,7 @@ _Bool is_inside_box(Vector point, struct VoxelCube box);
 // result:
 
 void shoot_ray(Colour restrict result, Vector start, Vector dir,
-               struct VoxelCube cube, double tmax);
+               struct VoxelCube cube);
 
 // cast rays from an image plane onto a voxel cube:
 
