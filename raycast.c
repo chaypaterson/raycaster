@@ -180,7 +180,7 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
         .geom.normal = {1, 0, 0},
         .geom.eye = {1, 0, 0},
 
-        .buff = buff
+        .film = buff
     };
 
     return image_plane;
@@ -200,7 +200,7 @@ void save_image_plane(char* frameppm, struct ImagePlane plane,
             Pixel colour;
             for (char ch = 0; ch < VChannels; ++ch) {
                 // Quantise with a saturation value and gamma correction:
-                colour[ch] = quantise(plane.buff[row][col][ch], exposure, gamma);
+                colour[ch] = quantise(plane.film[row][col][ch], exposure, gamma);
             }
             putpixel(img, colour);
         }
@@ -210,11 +210,11 @@ void save_image_plane(char* frameppm, struct ImagePlane plane,
 }
 
 void wipe_plane(struct ImagePlane plane) {
-    // wipe image buffer, filling it with empty pixels:
+    // wipe image film, filling it with empty pixels:
     float Black[VChannels] = {0, 0, 0};
     for (unsigned row = 0; row < plane.resol.rows; ++row) {
         for (unsigned col = 0; col < plane.resol.cols; ++col) {
-            memcpy(plane.buff[row][col], Black, Colour_size);
+            memcpy(plane.film[row][col], Black, Colour_size);
         }
     }
 }
@@ -222,11 +222,11 @@ void wipe_plane(struct ImagePlane plane) {
 void free_image_plane(struct ImagePlane plane) {
     for (unsigned row = 0; row < plane.resol.rows; ++row) {
         for (unsigned col = 0; col < plane.resol.cols; ++col) {
-            free(plane.buff[row][col]);
+            free(plane.film[row][col]);
         }
-        free(plane.buff[row]);
+        free(plane.film[row]);
     }
-    free(plane.buff);
+    free(plane.film);
 }
 
 // Geometry and ray casting: place imaging plane in the scene, detect
@@ -455,7 +455,7 @@ void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
                 dirn[axis] = -image_plane.geom.normal[axis];
 
             // Assign a pixel from the image buffer:
-            Colour pixel = image_plane.buff[row][col];
+            Colour pixel = image_plane.film[row][col];
 
             // increment pixel value by the brightness along the ray:
             shoot_ray(pixel, ray, dirn, cube);

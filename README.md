@@ -49,3 +49,9 @@ file's contents.
 
 NaN values will be rendered as black voxels or voxels with unexpected colours.
 To keep this library simple, input is assumed to be nice and not contain NaNs.
+
+## TODO
+
+Currently, the image buffer and voxel buffers defined in raycast.h have type
+`Colour **` and `Colour ***buff` -- it would be better to have types that
+were contiguous in memory but could still be accessed as variable length arrays.

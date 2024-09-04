@@ -59,10 +59,10 @@ struct ImagePlane {
         Vector eye; // The eye from which rays are cast (optional)
     } geom;
 
-    // Buffer containing the contents of the image:
-    Colour **buff;
-    // The buffer should be accessed like:
-    //          this.buff[row][col]
+    // "Film" is a buffer containing the contents of the image:
+    Colour **film;
+    // The film should be accessed like:
+    //          this.film[row][col]
     // Note: that the image buffer is row-major: the "x" tangent vector points
     // down, in the direction that rows increase, and the "y" tangent vector
     // points right, in the direction that columns increase.
@@ -115,7 +115,7 @@ void wipe_plane(struct ImagePlane plane);
 // Free the memory in the image buffer of the image plane:
 void free_image_plane(struct ImagePlane plane);
 
-// Quantise and write the image plane colour buffer to a file:
+// Quantise and write the image plane film to a file:
 void save_image_plane(char* frameppm, struct ImagePlane plane, 
                       float exposure, float gamma);
 
