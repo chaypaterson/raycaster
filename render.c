@@ -78,6 +78,8 @@ int main(int argc, char* argv[]) {
 
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
+    // Add some axes:
+    draw_rgb_axes(cube);
 
     // sanity check:
     printf("Max colour value: %f\n", maximum_colour_value(cube));
@@ -89,7 +91,8 @@ int main(int argc, char* argv[]) {
 
     // Step 2: draw the cube and make a video
     // construct imaging plane:
-    struct ImagePlane plane = new_image_plane(640, 640);
+    struct ImagePlane plane = new_image_plane(1080, 1920); // UHD
+    plane.geom.dims[1] *= 1920 * 1.0 / 1080; // rescale plane
     printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
 
     // Set scene geometry:
