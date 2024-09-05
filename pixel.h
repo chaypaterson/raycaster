@@ -28,6 +28,8 @@ double luma_y(Pixel colour);
 // Blend two colours, correcting for constant luminance:
 void mixcolours_y_corr(Pixel newcolour, double weight1, Pixel colour2);
 
+// Floating point colour conversion functions and helpers:
+
 // quantise a floating point value to a char after applying gamma correction:
 char quantise(float colourch, float sat, float gamma);
 

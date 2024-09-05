@@ -7,7 +7,7 @@
  */
 
 // Memory management: constructors and destructors for the bounding box and
-// image plane
+// camera
 
 struct VoxelCube new_unit_cube(unsigned res_x, unsigned res_y, unsigned res_z) {
     // Create colour buffer with correct dimensions:
@@ -153,8 +153,8 @@ float maximum_colour_value(struct VoxelCube cube) {
     return maxval;
 }
 
-struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
-    // Return an image plane with the specified resolution in a default location
+struct Camera new_camera(unsigned rows, unsigned cols) {
+    // Return an camera with the specified resolution in a default location
     // and orientation in the scene.
 
     // zero initialise image buffer:
@@ -168,7 +168,7 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
         }
     }
 
-    struct ImagePlane image_plane = {
+    struct Camera camera = {
         .resol.rows = rows,
         .resol.cols = cols,
 
@@ -183,12 +183,12 @@ struct ImagePlane new_image_plane(unsigned rows, unsigned cols) {
         .film = buff
     };
 
-    return image_plane;
+    return camera;
 }
 
 #include "pixel.h"
-void save_image_plane(char* frameppm, struct ImagePlane plane, 
-                      float exposure, float gamma) {
+void save_film(char* frameppm, struct Camera plane,
+               float exposure, float gamma) {
     // Write the image plane to a file, setting overall brightness (exposure)
     // and correcting for gamma.
     FILE* img = fopen(frameppm, "w");
@@ -209,7 +209,7 @@ void save_image_plane(char* frameppm, struct ImagePlane plane,
     fclose(img);
 }
 
-void wipe_plane(struct ImagePlane plane) {
+void blank_film(struct Camera plane) {
     // wipe image film, filling it with empty pixels:
     float Black[VChannels] = {0, 0, 0};
     for (unsigned row = 0; row < plane.resol.rows; ++row) {
@@ -219,7 +219,7 @@ void wipe_plane(struct ImagePlane plane) {
     }
 }
 
-void free_image_plane(struct ImagePlane plane) {
+void destroy_film(struct Camera plane) {
     for (unsigned row = 0; row < plane.resol.rows; ++row) {
         for (unsigned col = 0; col < plane.resol.cols; ++col) {
             free(plane.film[row][col]);
@@ -232,10 +232,10 @@ void free_image_plane(struct ImagePlane plane) {
 // Geometry and ray casting: place imaging plane in the scene, detect
 // collisions, and shoot rays.
 
-void orient_image_plane(struct ImagePlane *image_plane,
+void orient_camera(struct Camera *camera,
                         struct VoxelCube ref_cube,
                         double range, double theta, double phi) {
-    // Move the image plane so it is at a distance range from the centre of the 
+    // Move the camera so it is at a distance range from the centre of the 
     // reference cube, and oriented so that the vector connecting the cube's
     // centre with the plane's centre is normal to the plane.
 
@@ -245,35 +245,35 @@ void orient_image_plane(struct ImagePlane *image_plane,
                      cos(theta)};
 
     for (char axis = 0; axis < 3; ++axis) {
-        image_plane->geom.normal[axis] = normal[axis];
+        camera->geom.normal[axis] = normal[axis];
     }
 
-    // Move centre of image plane to new location:
+    // Move centre of camera to new location:
     for (char axis = 0; axis < 3; ++axis) {
-        image_plane->geom.centre[axis] = ref_cube.geom.centre[axis];
-        image_plane->geom.centre[axis] += range * normal[axis];
+        camera->geom.centre[axis] = ref_cube.geom.centre[axis];
+        camera->geom.centre[axis] += range * normal[axis];
     }
 
     // Place eye at double the range from the cube centre:
     for (char axis = 0; axis < 3; ++axis) {
-        image_plane->geom.eye[axis] = image_plane->geom.centre[axis];
-        image_plane->geom.eye[axis] += range * normal[axis];
+        camera->geom.eye[axis] = camera->geom.centre[axis];
+        camera->geom.eye[axis] += range * normal[axis];
     }
 
     // compute tangent vectors:
     // The "x" tangent vector (points to the next row) is the theta unit vector
     // in polar coords
 
-    image_plane->geom.tangent[0][0] = cos(theta) * cos(phi);
-    image_plane->geom.tangent[0][1] = cos(theta) * sin(phi);
-    image_plane->geom.tangent[0][2] = -sin(theta);
+    camera->geom.tangent[0][0] = cos(theta) * cos(phi);
+    camera->geom.tangent[0][1] = cos(theta) * sin(phi);
+    camera->geom.tangent[0][2] = -sin(theta);
 
     // The "y" tangent vector (points to the next col) is the phi unit vector
     // in polar coords
 
-    image_plane->geom.tangent[1][0] = -sin(phi);
-    image_plane->geom.tangent[1][1] = +cos(phi);
-    image_plane->geom.tangent[1][2] = 0;
+    camera->geom.tangent[1][0] = -sin(phi);
+    camera->geom.tangent[1][1] = +cos(phi);
+    camera->geom.tangent[1][2] = 0;
 }
 
 _Bool is_inside_box(Vector point, struct VoxelCube box) {
@@ -402,7 +402,7 @@ void shoot_ray(Colour restrict result,
     }
 }
 
-void start_position(Vector ray, struct ImagePlane plane, 
+void start_position(Vector ray, struct Camera plane, 
                     unsigned row, unsigned col) {
     // get in-plane pixel coordinates relative to the plane's centre:
     double x = (plane.resol.rows - row) * 1.0 / plane.resol.rows - 0.5;
@@ -423,7 +423,7 @@ void start_position(Vector ray, struct ImagePlane plane,
     }
 }
 
-void get_eye_direction(Vector dirn, struct ImagePlane plane, Vector ray) {
+void get_eye_direction(Vector dirn, struct Camera plane, Vector ray) {
     // initially set dirn = ray - eye position
     double norm = 0;
     for (char axis = 0; axis < 3; ++axis) {
@@ -436,26 +436,26 @@ void get_eye_direction(Vector dirn, struct ImagePlane plane, Vector ray) {
         dirn[axis] /= norm;
 }
 
-void raycast(struct ImagePlane image_plane, struct VoxelCube cube) {
-    // Fill the image_plane's image buffer by casting rays onto the cube from
+void raycast(struct Camera camera, struct VoxelCube cube) {
+    // Fill the camera's image buffer by casting rays onto the cube from
     // each pixel
     // Note: we shouldn't need to pass pointers to the objects in this function
     // because the buffers are already indirected.
 
-    for (unsigned row = 0; row < image_plane.resol.rows; ++row) {
-        for (unsigned col = 0; col < image_plane.resol.cols; ++col) {
-            // set scene coordinates of this pixel in the image plane
+    for (unsigned row = 0; row < camera.resol.rows; ++row) {
+        for (unsigned col = 0; col < camera.resol.cols; ++col) {
+            // set scene coordinates of this pixel in the camera
             Vector ray;
-            start_position(ray, image_plane, row, col);
+            start_position(ray, camera, row, col);
             
             // ray is now at the pixel coordinates in the scene. Cast this ray
             // in the direction "normal" (to the plane -- towards the cube)
             Vector dirn;
             for (char axis = 0; axis < 3; ++axis) 
-                dirn[axis] = -image_plane.geom.normal[axis];
+                dirn[axis] = -camera.geom.normal[axis];
 
             // Assign a pixel from the image buffer:
-            Colour pixel = image_plane.film[row][col];
+            Colour pixel = camera.film[row][col];
 
             // increment pixel value by the brightness along the ray:
             shoot_ray(pixel, ray, dirn, cube);

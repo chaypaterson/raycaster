@@ -91,9 +91,9 @@ int main(int argc, char* argv[]) {
 
     // Step 2: draw the cube and make a video
     // construct imaging plane:
-    struct ImagePlane plane = new_image_plane(1080, 1920); // UHD
-    plane.geom.dims[1] *= 1920 * 1.0 / 1080; // rescale plane
-    printf("Plane geometry: %g x %g\n", plane.geom.dims[0], plane.geom.dims[1]);
+    struct Camera camera = new_camera(1080, 1920); // UHD
+    camera.geom.dims[1] *= 1920 * 1.0 / 1080; // rescale camera
+    printf("Plane geometry: %g x %g\n", camera.geom.dims[0], camera.geom.dims[1]);
 
     // Set scene geometry:
     double theta = -M_PI * 0.25;
@@ -107,20 +107,20 @@ int main(int argc, char* argv[]) {
 
     for (int frame = 0; frame < maxframes; ++frame) {
         // Place the camera in the scene:
-        orient_image_plane(&plane, cube, 2.0, theta, phi);
+        orient_camera(&camera, cube, 2.0, theta, phi);
 
         // render scene (take a picture):
-        raycast(plane, cube);
+        raycast(camera, cube);
 
         // Choose a filename for this image:
         char frameppm[sizeof("frame000.ppm")];
         sprintf(frameppm, "frame%03d.ppm", frame);
 
-        // quantise colours and write out plane image buffer to file:
-        save_image_plane(frameppm, plane, exposure, gamma);
+        // quantise colours and write out camera image buffer to file:
+        save_film(frameppm, camera, exposure, gamma);
 
-        // clean the image plane so it is ready for the next frame:
-        wipe_plane(plane);
+        // clean the image camera so it is ready for the next frame:
+        blank_film(camera);
 
         // Move the camera around in an interesting way:
         phi += 2.0 * M_PI / maxframes;
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
     }
 
     free_unit_cube(cube);
-    free_image_plane(plane);
+    destroy_film(camera);
 
     printf("\nDone\n");
 
