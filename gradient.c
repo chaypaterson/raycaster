@@ -26,9 +26,12 @@ void gradient_test() {
         for (int col = 0; col < cols; ++col) {
             // Choose a colour:
             double f = col * 1.0/cols;
-            Pixel colour = {COLOUR_MAX * (0.6 - 0.4 * cos(M_PI * f) - 0.2 * cos(2 * M_PI * f)),
-                            COLOUR_MAX * (0.4 + 0.1 * cos(M_PI * f) + 0.3 * cos(2 * M_PI * f)),
-                            COLOUR_MAX * (0.6 + 0.4 * cos(M_PI * f))};
+            // round to nearest 16th:
+            f = ((int)(f * 16)) * 1.0 / 16;
+            double theta = 4 * M_PI * f / 3;
+            Pixel colour = {COLOUR_MAX * (0.666 - 0.333 * cos(theta)),
+                            COLOUR_MAX * (0.666 + 0.167 * cos(theta) - 0.288 * sin(theta)),
+                            COLOUR_MAX * (0.666 + 0.167 * cos(theta) + 0.288 * sin(theta))};
 
             putpixel(img, colour);
         }

@@ -83,7 +83,8 @@ int main(int argc, char* argv[]) {
     draw_rgb_axes(cube);
 
     // sanity check:
-    printf("Max colour value: %f\n", maximum_colour_value(cube));
+    float max_colour = maximum_colour_value(cube);
+    printf("Max colour value: %f\n", max_colour);
 
     srand(0); // seed RNG for antialiasing
 
@@ -91,9 +92,6 @@ int main(int argc, char* argv[]) {
     printf("I should be 1: %d \n", is_inside_box(cube.geom.centre, cube));
 
     // Step 2: draw the cube and make a video
-    // construct imaging plane:
-    //struct Camera camera = new_camera(1080, 1920); // UHD
-    //camera.geom.dims[1] *= 1920 * 1.0 / 1080; // rescale camera
     struct Camera camera = new_camera(640, 640);
     printf("Plane geometry: %g x %g\n", camera.geom.dims[0], camera.geom.dims[1]);
 
@@ -122,7 +120,7 @@ int main(int argc, char* argv[]) {
         sprintf(frameppm, "frame%03d.ppm", frame);
 
         // quantise colours and write out camera image buffer to file:
-        //save_film(frameppm, camera, exposure, gamma);
+        save_film(frameppm, camera, exposure, gamma);
 
         // clean the image camera so it is ready for the next frame:
         blank_film(camera);
