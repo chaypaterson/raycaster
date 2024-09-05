@@ -5,6 +5,7 @@
 
 #include "pixel.h"
 #include "raycast.h"
+#include <time.h>
 
 void draw_rgb(struct VoxelCube cube) {
     // Draw an RGB cube in the voxel buffer:
@@ -91,8 +92,9 @@ int main(int argc, char* argv[]) {
 
     // Step 2: draw the cube and make a video
     // construct imaging plane:
-    struct Camera camera = new_camera(1080, 1920); // UHD
-    camera.geom.dims[1] *= 1920 * 1.0 / 1080; // rescale camera
+    //struct Camera camera = new_camera(1080, 1920); // UHD
+    //camera.geom.dims[1] *= 1920 * 1.0 / 1080; // rescale camera
+    struct Camera camera = new_camera(640, 640);
     printf("Plane geometry: %g x %g\n", camera.geom.dims[0], camera.geom.dims[1]);
 
     // Set scene geometry:
@@ -104,6 +106,9 @@ int main(int argc, char* argv[]) {
 
     // Create video with multiple views of the same cube:
     int maxframes = 150;
+
+    time_t t_start = time(NULL);
+    printf("Rendering...\n");
 
     for (int frame = 0; frame < maxframes; ++frame) {
         // Place the camera in the scene:
@@ -117,7 +122,7 @@ int main(int argc, char* argv[]) {
         sprintf(frameppm, "frame%03d.ppm", frame);
 
         // quantise colours and write out camera image buffer to file:
-        save_film(frameppm, camera, exposure, gamma);
+        //save_film(frameppm, camera, exposure, gamma);
 
         // clean the image camera so it is ready for the next frame:
         blank_film(camera);
@@ -129,6 +134,11 @@ int main(int argc, char* argv[]) {
 
     free_unit_cube(cube);
     destroy_film(camera);
+
+    // Save reel to disk:
+    time_t t_end = time(NULL);
+    printf("Rendering complete, %d frames in %d s (%gfps)\n",
+           maxframes, t_end - t_start, maxframes * 1.0 / (t_end - t_start));
 
     printf("\nDone\n");
 
