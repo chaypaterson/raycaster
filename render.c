@@ -64,10 +64,16 @@ int main(int argc, char* argv[]) {
     cube_get = rgb_test;
     char* filename = "rgb.cube";
 
+    // Set default exposure and gamma
+    float exposure = 0.1f; // lower is brighter
+    float gamma = 0.25; // lower is more compressed
+
     // Optional argv behaviour: load a cube from a file. 
     // e.g.
     //      ./renderer --load [file.cube]
     const char* loadme = "--load";
+    const char* brightness = "--exposure";
+    const char* correction = "--gamma";
     for (char* *arg = argv; *(arg + 1) != NULL; ++arg) {
         if (!strcmp(loadme, *arg)) {
             // Set the cube getter and filename:
@@ -75,12 +81,20 @@ int main(int argc, char* argv[]) {
             filename = *(arg + 1);
             printf("Loading %s...\n", filename);
         }
+        if (!strcmp(brightness, *arg)) {
+            exposure = atof(*(arg + 1));
+            printf("Exposure: %f\n", exposure);
+        }
+        if (!strcmp(correction, *arg)) {
+            gamma = atof(*(arg + 1));
+            printf("Gamma: %f\n", gamma);
+        }
     }
 
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
     // Add some axes:
-    draw_rgb_axes(cube);
+    //draw_rgb_axes(cube);
 
     // sanity check:
     float max_colour = maximum_colour_value(cube);
@@ -98,9 +112,6 @@ int main(int argc, char* argv[]) {
     // Set scene geometry:
     double theta = -M_PI * 0.25;
     double phi = 0.0f;
-
-    float exposure = 1.0f; // lower is brighter
-    float gamma = 0.95; // lower is more compressed
 
     // Create video with multiple views of the same cube:
     int maxframes = 150;
