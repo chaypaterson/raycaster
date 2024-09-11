@@ -6,11 +6,11 @@ animations using volumetric raycasting to visualise scientific data.
 
 ## Building
 
-It compiles with
+It compiles (`-O3` optional but recommended) with
 
-    cc pixel.c -c -o pixel.a
-    cc raycast.c -c -o raycast.a
-    cc pixel.a raycast.a render.c -o renderer -lm
+    cc [-O3] pixel.c -c -o pixel.a
+    cc [-O3] raycast.c -c -o raycast.a
+    cc [-O3] pixel.a raycast.a render.c -o renderer -lm
 
 Running `./renderer` with no arguments then produces a series of PPM images in
 binary format. This stack of PPM images can then be converted to a video with
@@ -19,10 +19,6 @@ e.g. FFmpeg.
 The structure of render.c is deliberately simple and hackable, with most of the
 work done by the pixel.c and raycast.c libraries. The API for these libraries is
 detailed in pixel.h and raycast.h.
-
-Note: compiling raycast.c with optimisation levels higher than -O1 under clang
-results in unexpected behaviour and is not recommended. With GCC this doesn't
-seem to happen, and -O3 is perfectly fine.
 
 ## Serialisation
 
