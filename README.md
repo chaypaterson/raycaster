@@ -55,3 +55,7 @@ To keep this library simple, input is assumed to be nice and not contain NaNs.
 Currently, the image buffer and voxel buffers defined in raycast.h have type
 `Colour **` and `Colour ***buff` -- it would be better to have types that
 were contiguous in memory but could still be accessed as variable length arrays.
+
+- The voxel buffer being contiguous in memory with a getter does not effect
+  performance but the syntax `get_voxel(cube, row, col, lyr)` is not as clear as
+  the syntax `cube.block[row][col][lyr]`.
