@@ -65,8 +65,8 @@ int main(int argc, char* argv[]) {
     char* filename = "rgb.cube";
 
     // Set default exposure and gamma
-    float exposure = 0.1f; // lower is brighter
-    float gamma = 0.25; // lower is more compressed
+    float exposure = 1.0f; // lower is brighter
+    float gamma = 0.95; // lower is more compressed
 
     // Optional argv behaviour: load a cube from a file. 
     // e.g.

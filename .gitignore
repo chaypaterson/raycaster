@@ -11,3 +11,4 @@ gradient
 nohup.out
 *.cube
 video/
+.DS_Store

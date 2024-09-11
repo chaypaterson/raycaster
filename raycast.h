@@ -79,13 +79,13 @@ struct VoxelCube {
     struct {
         // This is currently trivial but we may as well store its
         // orientation for consistency and generalisability:
-        double dims[3]; // dimensions of the cube
-        Vector centre;
-        Vector orient[3]; // Orientation of the cube
+        double dims[3]; // side lengths of the cube
+        Vector centre; // centre of the cube
+        Vector orient[3]; // Orientation of the cube: vectors that point from
+        // the centre to the midpoint of one face on each axis
         double extinction; // Opacity of the cube. 1.0 = transparent,
         // 0.0=completely opaque. TODO really we should give individual voxels
         // an alpha channel.
-        double circumradius; // Half the diagonal length of the cube
     } geom;
 
     Colour ***block; // Buffer containing the contents of the voxel cloud

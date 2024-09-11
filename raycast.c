@@ -44,12 +44,16 @@ struct VoxelCube new_unit_cube(unsigned res_x, unsigned res_y, unsigned res_z) {
         // Default: cube should be transparent
         .geom.extinction = 1.0,
 
-        // Initial value: TODO this is not portable for non-unit cubes
-        .geom.circumradius = 0.866,
-
         // Allocate memory for voxel buffer
         .block = buff
     };
+
+    // resize face vectors:
+    for (int face = 0; face < 3; ++face) {
+        for (int axis = 0; axis < 3; ++axis) {
+            unitcube.geom.orient[face][axis] *= 0.5 * unitcube.geom.dims[face];
+        }
+    }
 
     return unitcube;
 }
@@ -314,6 +318,52 @@ double dot(Vector a, Vector b) {
     return product;
 }
 
+double _intersect_cube_either(Vector start, Vector dir, struct VoxelCube cube,
+                              double (*cmp1)(double, double), 
+                              double (*cmp2)(double, double)) {
+    // Find the t at which the ray start + t * dir enters or leaves the cube
+    // To find the t of entry(/exit):
+
+    Vector difference; // between pixel and cube centres
+    for (char axis = 0; axis < 3; ++axis) {
+        difference[axis] = cube.geom.centre[axis] - start[axis];
+    }
+    double epsilon = 1e-3; // guard against division by zero
+
+    // For each face of the cube:
+    double intersect[3];
+    for (int face = 0; face < 3; ++face) {
+        // Compute two candidate ts from
+        // t+- = (dot(face, difference(start - centre)) +- dot(face,face))
+        //      / dot(dir, face)
+        // and keep the min(/max).
+        double tplus, tminus;
+        double normface = dot(cube.geom.orient[face], cube.geom.orient[face]);
+        double dotface = dot(difference, cube.geom.orient[face]);
+        double denom = dot(dir, cube.geom.orient[face]);
+        tplus  = dotface + normface;
+        tminus = dotface - normface;
+        tplus /= denom;
+        tminus /= denom;
+
+        intersect[face] = cmp1(tplus, tminus);
+    }
+    // Then take the three candidate t values and return the max(/min):
+    double true_intersect = intersect[0];
+    for (int face = 1; face < 3; ++face) {
+        true_intersect = cmp2(true_intersect, intersect[face]);
+    }
+    return true_intersect;
+}
+
+double enter_cube(Vector start, Vector dir, struct VoxelCube cube) {
+    return _intersect_cube_either(start, dir, cube, fmin, fmax);
+}
+
+double leave_cube(Vector start, Vector dir, struct VoxelCube cube) {
+    return _intersect_cube_either(start, dir, cube, fmax, fmin);
+}
+
 double randdbl(double epsilon) {
     // return a random variate with zero mean and variance epsilon^2 / 4:
     return epsilon * rand() / RAND_MAX - epsilon * 0.5;
@@ -346,26 +396,16 @@ void shoot_ray(Colour restrict result,
     }
 
     // Intelligently work out a good end point and skip useless iterations at
-    // the start. To do this, pre-compute intersections with a sphere that
-    // bounds the bounding cube (the circumsphere):
-    Vector difference; // between pixel and cube centres
-    for (char axis = 0; axis < 3; ++axis) {
-        difference[axis] = start[axis] - cube.geom.centre[axis];
-    }
-    double b = dot(dir, difference);
-    double c = dot(difference, difference);
-    c -= cube.geom.circumradius * cube.geom.circumradius;
-
-    if ((b > 0) || (b * b <= c)) return; // skip this pixel
-    // otherwise:
-    double twidth = sqrt(b * b - c);
+    // the start. To do this, pre-compute intersections with the bounding cube:
 
     Vector ray; // shoot this ray
-    double tstart = -b - twidth;
-    double tstop = -b + twidth;
+    double tstart = enter_cube(start, dir, cube);
+    double tstop =  leave_cube(start, dir, cube);
     // antialiasing: randomise the ray start position a little bit:
     tstart += randdbl(dt); // averages to zero
 
+    // if tstart < tstop then this ray does not intersect the bounding box and
+    // this for loop will skip it:
     for (double t = tstart; t < tstop; t += dt) {
         // compute position of tip of the ray:
         // ray = start + t * dir
@@ -374,31 +414,29 @@ void shoot_ray(Colour restrict result,
             ray[axis] += t * dir[axis];
         }
 
-        if (is_inside_box(ray, cube)) {
-            // convert a position in space into the coords of the nearest
-            // voxel:
+        // convert a position in space into the coords of the nearest
+        // voxel:
 
-            Vector difference;
-            for (char axis = 0; axis < 3; ++axis) {
-                difference[axis] = ray[axis] - corner[axis];
-                // normalise to range 0-1:
-                difference[axis] /= cube.geom.dims[axis];
-            }
-
-            // Nearest neighbour interpolation:
-            // round position in cube to nearest voxel:
-            unsigned row = roundcoord(cube.resol.x, difference[0]);
-            unsigned col = roundcoord(cube.resol.y, difference[1]);
-            unsigned lyr = roundcoord(cube.resol.z, difference[2]);
-
-            // get the colour of this voxel and update result:
-            for (char ch = 0; ch < VChannels; ++ch) {
-                result[ch] += cube.block[row][col][lyr][ch] * dt * transmission;
-            }
-
-            /* TODO voxels could have alpha channels instead? */
-            transmission *= cube.geom.extinction;
+        Vector difference;
+        for (char axis = 0; axis < 3; ++axis) {
+            difference[axis] = ray[axis] - corner[axis];
+            // normalise to range 0-1:
+            difference[axis] /= cube.geom.dims[axis];
         }
+
+        // Nearest neighbour interpolation:
+        // round position in cube to nearest voxel:
+        unsigned row = roundcoord(cube.resol.x, difference[0]);
+        unsigned col = roundcoord(cube.resol.y, difference[1]);
+        unsigned lyr = roundcoord(cube.resol.z, difference[2]);
+
+        // get the colour of this voxel and update result:
+        for (char ch = 0; ch < VChannels; ++ch) {
+            result[ch] += cube.block[row][col][lyr][ch] * dt * transmission;
+        }
+
+        /* TODO voxels could have alpha channels instead? */
+        transmission *= cube.geom.extinction;
     }
 }
 
