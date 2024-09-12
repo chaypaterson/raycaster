@@ -130,7 +130,7 @@ void orient_camera(struct Camera* camera,
                     struct VoxelCube ref_cube,
                     double range, double theta, double phi);
 
-// test if a point is inside a box:
+// test if a point is inside a box: // TODO unused in library now
 _Bool is_inside_box(Vector point, struct VoxelCube box);
 
 // shoot a ray along a vector and accumulate the colours of voxels inside a

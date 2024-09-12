@@ -328,7 +328,6 @@ double _intersect_cube_either(Vector start, Vector dir, struct VoxelCube cube,
     for (char axis = 0; axis < 3; ++axis) {
         difference[axis] = cube.geom.centre[axis] - start[axis];
     }
-    double epsilon = 1e-3; // guard against division by zero
 
     // For each face of the cube:
     double intersect[3];
@@ -367,13 +366,6 @@ double leave_cube(Vector start, Vector dir, struct VoxelCube cube) {
 double randdbl(double epsilon) {
     // return a random variate with zero mean and variance epsilon^2 / 4:
     return epsilon * rand() / RAND_MAX - epsilon * 0.5;
-}
-
-void randomise(Vector dirn, double epsilon) {
-    // add tiny random offsets to the direction as an antialiasing measure
-    for (char axis = 0; axis < 3; ++axis) {
-        dirn[axis] += randdbl(epsilon);
-    }
 }
 
 void shoot_ray(Colour restrict result,
