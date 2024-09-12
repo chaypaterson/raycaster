@@ -54,4 +54,8 @@ were contiguous in memory but could still be accessed as variable length arrays.
 
 - The voxel buffer being contiguous in memory with a getter does not effect
   performance but the syntax `get_voxel(cube, row, col, lyr)` is not as clear as
-  the syntax `cube.block[row][col][lyr]`.
+  the syntax `cube.block[row][col][lyr]`. Could making the frame buffer/`film`
+  contiguous in memory help though?
+- Passing pixels as restricted pointers inside `shoot_ray` (raycast.h) seems to
+  be carrying a lot of weight. Removing the one `restrict` keyword slows
+  rendering down by about 12%. Could other judicious type hints help?
