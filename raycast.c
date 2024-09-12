@@ -305,7 +305,7 @@ unsigned roundcoord(unsigned side_resolution, double difference) {
     rounded += (side_resolution - 1 - rounded) * (rounded >= side_resolution);
     // ensure positivity:
     // rounded = max(rounded, 0)
-    rounded += -rounded * (rounded < 0);
+    rounded *= (rounded > 0);
 
     return rounded;
 }
