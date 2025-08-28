@@ -46,7 +46,7 @@ void gradient_test() {
         for (int col = 0; col < cols; ++col) {
             // Choose a colour:
             double f = col * 1.0/cols;
-            double theta = 2 * M_PI * f;
+            double theta = 4 * M_PI * f / 3;
             Pixel colour = swatch2(theta);
 
             putpixel(img, colour);

@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
     // Add some axes:
-    //draw_rgb_axes(cube);
+    draw_rgb_axes(cube);
 
     // sanity check:
     float max_colour = maximum_colour_value(cube);
