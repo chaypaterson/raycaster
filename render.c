@@ -67,6 +67,7 @@ int main(int argc, char* argv[]) {
     // Set default exposure and gamma
     float exposure = 1.0f; // lower is brighter
     float gamma = 0.95; // lower is more compressed
+    char force_norml = 0; // forcibly normalise colour values
 
     // Optional argv behaviour: load a cube from a file. 
     // e.g.
@@ -74,6 +75,7 @@ int main(int argc, char* argv[]) {
     const char* loadme = "--load";
     const char* brightness = "--exposure";
     const char* correction = "--gamma";
+    const char* force_correct = "--force_normalise";
     for (char* *arg = argv; *(arg + 1) != NULL; ++arg) {
         if (!strcmp(loadme, *arg)) {
             // Set the cube getter and filename:
@@ -89,16 +91,25 @@ int main(int argc, char* argv[]) {
             gamma = atof(*(arg + 1));
             printf("Gamma: %f\n", gamma);
         }
+        if (!strcmp(force_correct, *arg)) {
+            force_norml = 1;
+            printf("Forcing brightness normalisation!\n");
+        }
     }
 
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
-    // Add some axes:
-    draw_rgb_axes(cube);
 
     // sanity check:
     float max_colour = maximum_colour_value(cube);
     printf("Max colour value: %f\n", max_colour);
+    if (force_norml) {
+        exposure = max_colour;
+        printf("Exposure: %f\n;", exposure);
+    }
+
+    // Add some axes:
+    draw_rgb_axes(cube);
 
     srand(0); // seed RNG for antialiasing
 
