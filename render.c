@@ -65,9 +65,9 @@ int main(int argc, char* argv[]) {
     char* filename = "rgb.cube";
 
     // Set default exposure and gamma
-    float exposure = 1.0f; // lower is brighter
+    float exposure = 1.0f; // saturation value: lower is brighter
+    char auto_expos = 1; // auto normalise colour values (the default)
     float gamma = 0.95; // lower is more compressed
-    char force_norml = 0; // forcibly normalise colour values
 
     // Optional argv behaviour: load a cube from a file. 
     // e.g.
@@ -75,7 +75,6 @@ int main(int argc, char* argv[]) {
     const char* loadme = "--load";
     const char* brightness = "--exposure";
     const char* correction = "--gamma";
-    const char* force_correct = "--force_normalise";
     for (char* *arg = argv; *(arg + 1) != NULL; ++arg) {
         if (!strcmp(loadme, *arg)) {
             // Set the cube getter and filename:
@@ -84,6 +83,7 @@ int main(int argc, char* argv[]) {
             printf("Loading %s...\n", filename);
         }
         if (!strcmp(brightness, *arg)) {
+            auto_expos = 0;
             exposure = atof(*(arg + 1));
             printf("Exposure: %f\n", exposure);
         }
@@ -91,22 +91,15 @@ int main(int argc, char* argv[]) {
             gamma = atof(*(arg + 1));
             printf("Gamma: %f\n", gamma);
         }
-        if (!strcmp(force_correct, *arg)) {
-            force_norml = 1;
-            printf("Forcing brightness normalisation!\n");
-        }
     }
 
     // Get the cube:
     struct VoxelCube cube = cube_get(filename);
 
-    // sanity check:
+    // auto exposure:
     float max_colour = maximum_colour_value(cube);
     printf("Max colour value: %f\n", max_colour);
-    if (force_norml) {
-        exposure = max_colour;
-        printf("Exposure: %f\n;", exposure);
-    }
+    if (auto_expos) exposure = max_colour;
 
     // Add some axes:
     draw_rgb_axes(cube);
@@ -124,7 +117,7 @@ int main(int argc, char* argv[]) {
     double theta = -M_PI * 0.25;
     double phi = 0.0f;
 
-    // Create video with multiple views of the same cube:
+    // Shoot a video with multiple views of the same cube:
     int maxframes = 150;
 
     time_t t_start = time(NULL);
@@ -157,7 +150,7 @@ int main(int argc, char* argv[]) {
 
     // Save reel to disk:
     time_t t_end = time(NULL);
-    printf("Rendering complete, %d frames in %d s (%gfps)\n",
+    printf("Rendering complete, %d frames in %ld s (%gfps)\n",
            maxframes, t_end - t_start, maxframes * 1.0 / (t_end - t_start));
 
     printf("\nDone\n");
