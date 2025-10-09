@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
     float exposure = 1.0f; // saturation value: lower is brighter
     char auto_expos = 1; // auto normalise colour values (default: on)
     float gamma = 0.95; // lower is more compressed
-    char add_axes = 0; // draw RGB XYZ axes before rendering the cube
+    char add_axes = 0; // draw RGB XYZ axes before rendering the cube (default: off)
 
     // Optional argv behaviour:
     // e.g.
