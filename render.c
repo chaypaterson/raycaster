@@ -66,30 +66,36 @@ int main(int argc, char* argv[]) {
 
     // Set default exposure and gamma
     float exposure = 1.0f; // saturation value: lower is brighter
-    char auto_expos = 1; // auto normalise colour values (the default)
+    char auto_expos = 1; // auto normalise colour values (default: on)
     float gamma = 0.95; // lower is more compressed
+    char add_axes = 0; // draw RGB XYZ axes before rendering the cube
 
-    // Optional argv behaviour: load a cube from a file. 
+    // Optional argv behaviour:
     // e.g.
-    //      ./renderer --load [file.cube]
-    const char* loadme = "--load";
-    const char* brightness = "--exposure";
-    const char* correction = "--gamma";
+    //      ./renderer --load [file.cube] --gamma [gamma] --with_axes ...
+    const char* arg_loadme = "--load";
+    const char* arg_brightness = "--exposure";
+    const char* arg_correction = "--gamma";
+    const char* arg_with_axes = "--with_axes";
     for (char* *arg = argv; *(arg + 1) != NULL; ++arg) {
-        if (!strcmp(loadme, *arg)) {
+        if (!strcmp(arg_loadme, *arg)) {
             // Set the cube getter and filename:
             cube_get = load_cube;
             filename = *(arg + 1);
             printf("Loading %s...\n", filename);
         }
-        if (!strcmp(brightness, *arg)) {
+        if (!strcmp(arg_brightness, *arg)) {
             auto_expos = 0;
             exposure = atof(*(arg + 1));
             printf("Exposure: %f\n", exposure);
         }
-        if (!strcmp(correction, *arg)) {
+        if (!strcmp(arg_correction, *arg)) {
             gamma = atof(*(arg + 1));
             printf("Gamma: %f\n", gamma);
+        }
+        if (!strcmp(arg_with_axes, *arg)) {
+            add_axes = 1;
+            printf("Adding XYZ axes\n");
         }
     }
 
@@ -102,7 +108,7 @@ int main(int argc, char* argv[]) {
     if (auto_expos) exposure = max_colour;
 
     // Add some axes:
-    draw_rgb_axes(cube);
+    if (add_axes) draw_rgb_axes(cube);
 
     srand(0); // seed RNG for antialiasing
 
