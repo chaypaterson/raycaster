@@ -44,7 +44,6 @@ struct VoxelCube rgb_test(char* filename) {
 
     // Fill a default cube with stuff:
     draw_rgb(cube);
-    draw_rgb_axes(cube);
 
     // Try saving and loading cube:
     printf("Saving cube...\n");
@@ -70,33 +69,26 @@ int main(int argc, char* argv[]) {
     float gamma = 0.95; // lower is more compressed
     char add_axes = 0; // draw RGB XYZ axes before rendering the cube (default: off)
 
-    // Optional argv behaviour:
+    // Parse optional argv behaviours:
     // e.g.
     //      ./renderer --load [file.cube] --gamma [gamma] --with_axes ...
     const char* arg_loadme = "--load";
     const char* arg_brightness = "--exposure";
     const char* arg_correction = "--gamma";
     const char* arg_with_axes = "--with_axes";
-    for (char* *arg = argv; *(arg + 1) != NULL; ++arg) {
+    for (char* *arg = argv; *arg != NULL; ++arg) {
         if (!strcmp(arg_loadme, *arg)) {
             // Set the cube getter and filename:
             cube_get = load_cube;
-            filename = *(arg + 1);
+            filename = arg[1];
             printf("Loading %s...\n", filename);
         }
-        if (!strcmp(arg_brightness, *arg)) {
+        if (!strcmp(arg_brightness, *arg) && arg[1]) {
             auto_expos = 0;
-            exposure = atof(*(arg + 1));
-            printf("Exposure: %f\n", exposure);
+            exposure = atof(arg[1]);
         }
-        if (!strcmp(arg_correction, *arg)) {
-            gamma = atof(*(arg + 1));
-            printf("Gamma: %f\n", gamma);
-        }
-        if (!strcmp(arg_with_axes, *arg)) {
-            add_axes = 1;
-            printf("Adding XYZ axes\n");
-        }
+        if (!strcmp(arg_correction, *arg) && arg[1]) gamma = atof(arg[1]);
+        if (!strcmp(arg_with_axes, *arg)) add_axes = 1;
     }
 
     // Get the cube:
@@ -106,6 +98,8 @@ int main(int argc, char* argv[]) {
     float max_colour = maximum_colour_value(cube);
     printf("Max colour value: %f\n", max_colour);
     if (auto_expos) exposure = max_colour;
+    printf("Exposure: %f\n", exposure);
+    printf("Gamma: %f\n", gamma);
 
     // Add some axes:
     if (add_axes) draw_rgb_axes(cube);
