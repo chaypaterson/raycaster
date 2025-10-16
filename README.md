@@ -1,7 +1,7 @@
 raycaster
 =========
 
-This program is a simple test program that will eventually be used to make
+This program is a simple test program that can be used to make
 animations using volumetric raycasting to visualise scientific data.
 
 ## Building
