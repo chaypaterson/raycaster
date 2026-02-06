@@ -105,8 +105,7 @@ struct VoxelCube load_cube(char *filename) {
     // three unsigned integers: the dimensions of the cube. The rest of the file
     // consists of the contents of the voxel colour buffer.
     FILE *file = fopen(filename, "rb");
-    // TODO 6 is a magic number here
-    const char signature[6] = "Voxel\n";
+    const char signature[6] = "Voxel\n"; // file signature is 6 chars long
 
     char header[sizeof(signature)];
     fread(header, sizeof(char), sizeof(signature), file);

@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
     const char* arg_correction = "--gamma";
     const char* arg_with_axes = "--with_axes";
     for (char* *arg = argv; *arg != NULL; ++arg) {
-        if (!strcmp(arg_loadme, *arg)) {
+        if (!strcmp(arg_loadme, *arg) && arg[1]) {
             // Set the cube getter and filename:
             cube_get = load_cube;
             filename = arg[1];

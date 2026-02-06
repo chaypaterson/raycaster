@@ -28,10 +28,9 @@ void mixcolours(Pixel newcolour, double weight1, Pixel colour2) {
 }
 
 double luma_y(Pixel colour) {
-    // return the sRGB luminance of a pixel
-    //return 0.2126 * colour[0] + 0.7152 * colour[1] + 0.0722 * colour[2];
+    // return the luminance of a pixel
+    // used to normalise brightnesses
     return 1.0f * colour[0] + 1.0f * colour[1] + 1.0f * colour[2];
-    //return colour[0] * colour[0] + colour[1] * colour[1] + colour[2] * colour[2];
 }
 
 void mixcolours_y_corr(Pixel newcolour, double weight1, Pixel colour2) {
